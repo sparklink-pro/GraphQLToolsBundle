@@ -1,0 +1,41 @@
+parameters:
+
+services:
+  _defaults:
+    autowire: true # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver:
+    public: true
+    bind:
+      $mapping: "%overblog_graphql_types.classes_map%"
+
+  graphql_resolver:
+    alias: Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver
+    public: true
+
+  Sparklink\GraphQLToolsBundle\Command\:
+    resource: "../../Command"
+
+  Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager:
+    public: true
+    arguments:
+      - !tagged_iterator { tag: "sparklink.type_manager", index_by: "type" }
+
+  sparklink.types_manager:
+    alias: Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager
+    public: true
+
+  Sparklink\GraphQLToolsBundle\Utils\Populator: ~
+  Sparklink\GraphQLToolsBundle\Manager\DefaultEntityTypeManager:
+    shared: false
+
+  Sparklink\GraphQLToolsBundle\Doctrine\LinkedEntityFinder: ~
+
+  Sparklink\GraphQLToolsBundle\GraphQL\Resolver\LinkedTypesResolver:
+    public: true
+
+  Sparklink\GraphQLToolsBundle\GraphQL\Resolver\DefaultInterfaceResolver:
+    arguments: ["@overblog_graphql.type_resolver"]
+    tags:
+      - { name: overblog_graphql.resolver, alias: "default_interface_resolver", method: "resolveType" }
