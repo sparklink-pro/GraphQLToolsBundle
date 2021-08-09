@@ -2,9 +2,14 @@
     "name": "sparklink/graphql-tools-bundle",
     "type": "symfony-bundle",
     "description": "Extension & tools for the Overblog/GraphQLBundle",
-    "keywords": ["backend", "admin", "generator", "graphql"],
+    "keywords": [
+        "backend",
+        "admin",
+        "generator",
+        "graphql"
+    ],
     "homepage": "https://github.com/sparklink-pro/GraphQLToolsBundle",
-    "license": "MIT",,
+    "license": "MIT",
     "require": {
         "php": ">=8",
         "symfony/dependency-injection": "^4.4|^5.0",
