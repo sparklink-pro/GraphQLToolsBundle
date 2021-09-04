@@ -8,13 +8,12 @@ use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudMutationBuilder extends CrudBuilder implements MappingInterface
 {
-    public function toMappingDefinition(array $config): array
+    public function toMappingDefinition(array $configTypes): array
     {
-        $resolver   = 'graphql_resolver';
         $manager    = 'sparklink.types_manager';
         $properties = [];
 
-        foreach ($this->types as $type => $configuration) {
+        foreach ($configTypes as $type => $configuration) {
             $idType      = $configuration['idType'] ?? 'Int';
             $isReference = $configuration['reference'] ?? false;
 

@@ -8,15 +8,14 @@ use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudQueryBuilder extends CrudBuilder implements MappingInterface
 {
-    public function toMappingDefinition(array $config): array
+    public function toMappingDefinition(array $configTypes): array
     {
         $resolver = 'graphql_resolver';
         $manager = 'sparklink.types_manager';
         $properties = [];
         $types = [];
 
-        foreach ($this->types as $type => $configuration) {
-            $idType = $configuration['idType'] ?? 'Int';
+        foreach ($configTypes as $type => $configuration) {
             $nameFind = $type;
             $nameFindAll = \sprintf('list%s', $type);
             $payloadType = \sprintf('%sPayload', $nameFindAll);
