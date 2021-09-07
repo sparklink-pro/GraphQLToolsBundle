@@ -18,13 +18,10 @@ class Upload extends GraphQLUploadType
      */
     public function parseValue($value)
     {
-        if (null !== $value && (!$value instanceof File && false === !$value)) {
+        if (null !== $value && !$value instanceof File) {
             throw new InvariantViolation(\sprintf('Upload should be null or instance of "%s" but %s given.', File::class, \is_object($value) ? \get_class($value) : \gettype($value)));
         }
 
-        if (false === $value) {
-            $value = new DeletedFile();
-        }
 
         return $value;
     }

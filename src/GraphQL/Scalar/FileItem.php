@@ -4,36 +4,59 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\GraphQL\Scalar;
 
-use App\Entity\File as EntityFile;
-use App\Repository\FileRepository;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use GraphQL\Error\InvariantViolation;
-use Overblog\GraphQLBundle\Annotation as GQL;
 use Overblog\GraphQLBundle\Upload\Type\GraphQLUploadType;
 use Symfony\Component\HttpFoundation\File\File;
 
-#[GQL\Scalar(name: 'FileItem', scalarType: "@=newObject('Sparklink\\\GraphQLToolsBundle\\\GraphQL\\\Scalar\\\FileItem', [service('doctrine')])")]
-#[GQL\Description('File Item scalar type')]
-class FileItem extends GraphQLUploadType
+abstract class FileItem extends GraphQLUploadType
 {
-    protected FileRepository $repository;
+    protected EntityRepository $repository;
 
     public function __construct(ManagerRegistry $registry)
     {
-        $this->repository = $registry->getRepository(EntityFile::class);
+        $this->repository = $registry->getRepository($this->getFileEntityClass());
     }
+
+    abstract protected function getFileEntityClass(): string;
 
     /**
      * {@inheritdoc}
      */
-    public function parseValue($file)
+    public function parseValue($value)
     {
-        if ($file instanceof File) {
-            return new EntityFile($file);
-        } elseif (\is_array($file) && 'File' === $file['__typename'] && $file['id']) {
-            return $this->repository->find($file['id']);
-        } else {
-            throw new InvariantViolation('File Item must be a file array or uploaded file item must be a string');
+        if ($value instanceof File) {
+            return $this->createEntityFromFile($value);
         }
+
+        return $this->getEntityFromValue($value);
+    }
+
+    /**
+     * Create the file entity from uploaded file
+     * @param Symfony\Component\HttpFoundation\File\File $file
+     * @return null|object
+     */
+    protected function createEntityFromFile(File $file): ?object
+    {
+        $class = $this->getFileEntityClass();
+
+        return new $class($file);
+    }
+
+    /**
+     * Retrieve corresponding file entity from the value
+     * @param mixed $value
+     * @return null|object
+     */
+    protected function getEntityFromValue($value): ?object
+    {
+        if (\is_array($value) && (isset($value['id']) || isset($value['uid']))) {
+            $entityId = $value['id'] ?? $value['uid'];
+
+            return $this->repository->find($entityId);
+        }
+        throw new InvariantViolation('File Item must be a file array or uploaded file item must be a string');
     }
 }

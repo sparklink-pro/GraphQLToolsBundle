@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\Utils;
 
-use App\Entity\File;
-use App\GraphQL\Scalar\DeletedFile;
 use Doctrine\Common\Collections\Collection;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Populator
@@ -56,43 +53,9 @@ class Populator
                 if ($setter) {
                     $setter($entity, $value);
                 } else {
-                    $this->setScalarValue($entity, $property, $value);
+                    $this->accessor->setValue($entity, $property, $value);
                 }
             }
         }
-    }
-
-    public function mergeCollections(Collection $collection, array $inputCollection = null): int
-    {
-        $result = 0;
-        if (!$inputCollection) {
-            $result = $collection->count();
-            $collection->clear();
-        } else {
-            foreach ($collection as $entry) {
-                if (!\in_array($entry, $inputCollection)) {
-                    $collection->removeElement($entry);
-                    ++$result;
-                }
-            }
-            foreach ($inputCollection as $entry) {
-                if (!$collection->contains($entry)) {
-                    $collection->add($entry);
-                    ++$result;
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    protected function setScalarValue($entity, $property, $value): void
-    {
-        if ($value instanceof UploadedFile) {
-            $value = new File($value);
-        } elseif ($value instanceof DeletedFile) {
-            $value = null;
-        }
-        $this->accessor->setValue($entity, $property, $value);
     }
 }
