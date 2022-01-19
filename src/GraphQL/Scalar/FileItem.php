@@ -7,10 +7,9 @@ namespace Sparklink\GraphQLToolsBundle\GraphQL\Scalar;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use GraphQL\Error\InvariantViolation;
-use Overblog\GraphQLBundle\Upload\Type\GraphQLUploadType;
 use Symfony\Component\HttpFoundation\File\File;
 
-abstract class FileItem extends GraphQLUploadType
+abstract class FileItem extends Upload
 {
     protected EntityRepository $repository;
 
@@ -24,7 +23,7 @@ abstract class FileItem extends GraphQLUploadType
     /**
      * {@inheritdoc}
      */
-    public function parseValue($value)
+    public function parseValue($value): mixed
     {
         if ($value instanceof File) {
             return $this->createEntityFromFile($value);
@@ -34,9 +33,9 @@ abstract class FileItem extends GraphQLUploadType
     }
 
     /**
-     * Create the file entity from uploaded file
+     * Create the file entity from uploaded file.
+     *
      * @param Symfony\Component\HttpFoundation\File\File $file
-     * @return null|object
      */
     protected function createEntityFromFile(File $file): ?object
     {
@@ -46,9 +45,9 @@ abstract class FileItem extends GraphQLUploadType
     }
 
     /**
-     * Retrieve corresponding file entity from the value
+     * Retrieve corresponding file entity from the value.
+     *
      * @param mixed $value
-     * @return null|object
      */
     protected function getEntityFromValue($value): ?object
     {
