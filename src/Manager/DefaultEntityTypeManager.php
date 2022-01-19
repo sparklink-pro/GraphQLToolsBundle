@@ -66,11 +66,6 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function update($entity, $input, Configuration $configuration = null): object
     {
-        if (!$entity) {
-            $entity = new $this->entityClass();
-            $this->getEntityManager()->persist($entity);
-        }
-
         $this->populator->populateInput($entity, $input, $configuration);
         $errors = $this->validator->validate($entity);
 
@@ -78,6 +73,22 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
             throw new InvalidArgumentsError([new InvalidArgumentError('errors', $errors)]);
         }
 
+        $this->getEntityManager()->flush();
+
+        return $entity;
+    }
+
+    public function create($input, Configuration $configuration = null): object
+    {
+        $entity = new $this->entityClass();
+        $this->populator->populateInput($entity, $input, $configuration);
+        $errors = $this->validator->validate($entity);
+
+        if (\count($errors) > 0) {
+            throw new InvalidArgumentsError([new InvalidArgumentError('errors', $errors)]);
+        }
+
+        $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
 
         return $entity;

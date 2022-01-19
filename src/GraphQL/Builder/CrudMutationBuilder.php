@@ -4,46 +4,75 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\GraphQL\Builder;
 
+use Error;
 use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudMutationBuilder extends CrudBuilder implements MappingInterface
 {
-    public function toMappingDefinition(array $configTypes): array
+    public const OPERATION_CREATE = 'create';
+    public const OPERATION_UPDATE = 'update';
+    public const OPERATION_DELETE = 'delete';
+    public const OPERATIONS       = [
+        self::OPERATION_CREATE,
+        self::OPERATION_DELETE,
+        self::OPERATION_UPDATE,
+    ];
+    public const ALLOW_ALL_OPERATION = 'all';
+
+    public function toMappingDefinition(array $builderConfig): array
     {
         $manager    = 'sparklink.types_manager';
         $properties = [];
 
+        $configTypes = $builderConfig['types'];
         foreach ($configTypes as $type => $configuration) {
-            $idType      = $configuration['idType'] ?? 'Int';
+            if ('Position' !== $type) {
+                continue;
+            }
 
-            $hasMutations = !isset($configuration['mutation']) || false !== $configuration['mutation'];
+            if (!\array_key_exists('operations', $configuration)) {
+                throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
+            }
 
-            if ($hasMutations) {
-                $isCreatable = $configuration['mutation']['creatable'] ?? true;
-                $isDeletable = $configuration['mutation']['deletable'] ?? true;
-                $permission  = $configuration['permission'] ?? false;
+            $idType = $configuration['idType'] ?? 'Int';
 
-                $nameUpdate = sprintf('%sUpdate', $type);
-                $inputType  = sprintf('%sInput', $type);
-                $nameDelete = sprintf('%sDelete', $type);
+            $permission  = $configuration['permission'] ?? false;
 
-                $access = [];
-                if ($permission) {
-                    $access = ['access' => sprintf('@=perm("%s")', $permission)];
-                }
+            $nameCreate = sprintf('%sCreate', $type);
+            $nameUpdate = sprintf('%sUpdate', $type);
+            $nameDelete = sprintf('%sDelete', $type);
+            $inputType  = sprintf('%sInput', $type);
 
+            $access = [];
+            if ($permission) {
+                $access = ['access' => sprintf('@=perm("%s")', $permission)];
+            }
+
+            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_CREATE)) {
+                $properties[$nameCreate]= [
+                    'args' => [
+                        'input' => ['type' => $inputType],
+                    ],
+                    'description' => sprintf('Create a %s', $type),
+                    'type'        => $configuration['mutationType'] ?? $type,
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").create, arguments({ input: "%s"}, args))', $manager, $type, $inputType),
+                    ] + $access;
+            }
+
+            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_UPDATE)) {
                 $properties[$nameUpdate] = [
                     'args' => [
-                        'item'  => ['type' => sprintf('%s%s', $this->getEntityIdType($type), $isCreatable ? '' : '!')],
+                        'item'  => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
                         'input' => ['type' => sprintf('%s!', $inputType)],
                     ],
                     'description' => sprintf('Update or create an object of type %s', $type),
                     'type'        => $configuration['mutationType'] ?? $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({item: "%s", input: "%s"}, args))', $manager, $type, $idType, $inputType),
-                ] + $access;
+                    ] + $access;
+            }
 
-                if ($isDeletable) {
-                    $properties[$nameDelete] = [
+            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_DELETE)) {
+                $properties[$nameDelete] = [
                         'args' => [
                             'item' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
                         ],
@@ -51,7 +80,6 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                         'type'        => $configuration['mutationType'] ?? 'Boolean',
                         'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $idType),
                     ] + $access;
-                }
             }
         }
 

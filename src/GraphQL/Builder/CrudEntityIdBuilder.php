@@ -11,25 +11,28 @@ class CrudEntityIdBuilder extends CrudBuilder implements MappingInterface
     public function toMappingDefinition(array $configTypes): array
     {
         $resolver = 'graphql_resolver';
-        $types = [];
+        $types    = [];
+
+        $configTypes = $configTypes['types'];
 
         foreach ($configTypes as $type => $configuration) {
-            if (array_key_exists('entity_id', $configuration) && $configuration['entity_id'] === false) {
+            if (\array_key_exists('entity_id', $configuration) && false === $configuration['entity_id']) {
                 continue;
             }
+
             $entityIdType = $this->getEntityIdType($type);
 
             $types[$entityIdType] = [
-                'type' => 'custom-scalar',
+                'type'   => 'custom-scalar',
                 'config' => [
-                    'scalarType' => \sprintf('@=newObject("Sparklink\\\GraphQLToolsBundle\\\GraphQL\\\Doctrine\\\EntityIdType", [service("doctrine"), service("%s").getEntity("%s")])', $resolver, $type),
+                    'scalarType' => sprintf('@=newObject("Sparklink\\\GraphQLToolsBundle\\\GraphQL\\\Doctrine\\\EntityIdType", [service("doctrine"), service("%s").getEntity("%s")])', $resolver, $type),
                 ],
             ];
         }
 
         return [
             'fields' => [],
-            'types' => $types,
+            'types'  => $types,
         ];
     }
 }
