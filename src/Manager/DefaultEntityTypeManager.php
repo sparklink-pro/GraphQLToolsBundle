@@ -54,9 +54,9 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $this->getEntityManager()->getRepository($this->entityClass);
     }
 
-    public function list(): array
+    public function list($config, $orderBy): array
     {
-        return ['items' => $this->getRepository()->findAll()];
+        return ['items' => $this->getRepository()->findBy([], $orderBy)];
     }
 
     public function item($entity)
