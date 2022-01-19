@@ -28,6 +28,7 @@ class CrudEntityIdBuilder extends CrudBuilder implements MappingInterface
         }
 
         return [
+            'fields' => [],
             'types' => $types,
         ];
     }
