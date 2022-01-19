@@ -15,7 +15,6 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
 
         foreach ($configTypes as $type => $configuration) {
             $idType      = $configuration['idType'] ?? 'Int';
-            $isReference = $configuration['reference'] ?? false;
 
             $hasMutations = !isset($configuration['mutation']) || false !== $configuration['mutation'];
 
@@ -24,9 +23,9 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                 $isDeletable = $configuration['mutation']['deletable'] ?? true;
                 $permission  = $configuration['permission'] ?? false;
 
-                $nameUpdate = sprintf('update%s', $type);
-                $nameDelete = sprintf('delete%s', $type);
-                $inputType  = $isReference ? 'ReferenceInput' : sprintf('%sInput', $type);
+                $nameUpdate = sprintf('%sUpdate', $type);
+                $inputType  = sprintf('%sInput', $type);
+                $nameDelete = sprintf('%sDelete', $type);
 
                 $access = [];
                 if ($permission) {

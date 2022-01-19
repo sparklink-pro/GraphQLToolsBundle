@@ -10,16 +10,17 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
 {
     public function toMappingDefinition(array $configTypes): array
     {
-        $resolver = 'graphql_resolver';
         $manager = 'sparklink.types_manager';
         $properties = [];
         $types = [];
 
         foreach ($configTypes as $type => $configuration) {
+            if (array_key_exists('query', $configuration) && $configuration['query'] === false) {
+                continue;
+            }
             $nameFind = $type;
-            $nameFindAll = \sprintf('list%s', $type);
+            $nameFindAll = \sprintf('%sList', $type);
             $payloadType = \sprintf('%sPayload', $nameFindAll);
-            $entityIdType = $this->getEntityIdType($type);
 
             $properties[$nameFind] = [
                 'args' => [
@@ -51,12 +52,6 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     'fields' => [
                         'items' => \sprintf('[%s!]!', $type),
                     ],
-                ],
-            ];
-            $types[$entityIdType] = [
-                'type' => 'custom-scalar',
-                'config' => [
-                    'scalarType' => \sprintf('@=newObject("Sparklink\\\GraphQLToolsBundle\\\GraphQL\\\Doctrine\\\EntityIdType", [service("doctrine"), service("%s").getEntity("%s")])', $resolver, $type),
                 ],
             ];
         }

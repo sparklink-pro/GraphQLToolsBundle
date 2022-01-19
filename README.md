@@ -41,3 +41,14 @@ final class FileItem extends ScalarFileItem
 ### Time
 ### Timefull
 ### Upload
+
+
+## Builder
+
+### Query builder
+
+The query builder can generate, for each type, two queries: `Type` and `TypeList`. 
+
+### Mutation Builder
+
+The query builder can generate a mutation for a given type `TypeUpdate` and `TypeDelete`.
