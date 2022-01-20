@@ -38,6 +38,11 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $this->entityClass;
     }
 
+    protected function getEntityInstance(): object
+    {
+        return new $this->entityClass();
+    }
+
     public function setType(string $type): void
     {
         $this->type        = $type;
@@ -64,8 +69,13 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function update($entity, $input, Configuration $configuration = null): object
+    public function update($entity = null, $input, Configuration $configuration = null): object
     {
+        if (!$entity) {
+            $entity = $this->getEntityInstance();
+            $this->getEntityManager()->persist($entity);
+        }
+
         $this->populator->populateInput($entity, $input, $configuration);
         $errors = $this->validator->validate($entity);
 
@@ -80,18 +90,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function create($input, Configuration $configuration = null): object
     {
-        $entity = new $this->entityClass();
-        $this->populator->populateInput($entity, $input, $configuration);
-        $errors = $this->validator->validate($entity);
-
-        if (\count($errors) > 0) {
-            throw new InvalidArgumentsError([new InvalidArgumentError('errors', $errors)]);
-        }
-
-        $this->getEntityManager()->persist($entity);
-        $this->getEntityManager()->flush();
-
-        return $entity;
+        return $this->update(null, $input, $configuration);
     }
 
     public function delete($entity): bool
