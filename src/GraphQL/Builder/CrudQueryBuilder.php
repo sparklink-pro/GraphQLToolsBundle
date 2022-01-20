@@ -9,8 +9,13 @@ use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudQueryBuilder extends CrudBuilder implements MappingInterface
 {
+    public const OPERATION_GET  = 'get';
+    public const OPERATION_LIST = 'list';
+
     public function toMappingDefinition(array $builderConfig): array
     {
+        $configuration = $this->getConfiguration($builderConfig);
+
         $manager    = 'sparklink.types_manager';
         $properties = [];
         $types      = [];
@@ -26,7 +31,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             $nameFindAll = sprintf('%sList', $type);
             $payloadType = sprintf('%sPayload', $nameFindAll);
 
-            if ($this->isOperationActive($builderConfig, $type, 'get')) {
+            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_GET)) {
                 $properties[$nameFind] = [
                     'args' => [
                         'id' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
@@ -37,6 +42,9 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                 ];
             }
 
+            $access = [];
+            // $access = $this->getAccess($builderConfig, $type);
+
             $filters = $configuration['filters'] ?? [];
             $orders  = $configuration['list']['orderBy'] ?? ['id' => 'ASC'];
 
@@ -44,14 +52,14 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                 $orders = [$orders];
             }
 
-            if ($this->isOperationActive($builderConfig, $type, 'list')) {
+            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),
                     'type'        => $payloadType,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[args.getArrayCopy(), %s]', $orderBy)),
                     'args'        => $filters,
-                ];
+                ] + $access;
             }
 
             $types[$payloadType] = [
@@ -61,7 +69,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                         'items' => sprintf('[%s!]!', $type),
                     ],
                 ],
-            ];
+            ] + $access;
         }
 
         return [

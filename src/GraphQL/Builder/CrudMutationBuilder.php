@@ -12,12 +12,6 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
     public const OPERATION_CREATE = 'create';
     public const OPERATION_UPDATE = 'update';
     public const OPERATION_DELETE = 'delete';
-    public const OPERATIONS       = [
-        self::OPERATION_CREATE,
-        self::OPERATION_DELETE,
-        self::OPERATION_UPDATE,
-    ];
-    public const ALLOW_ALL_OPERATION = 'all';
 
     public function toMappingDefinition(array $builderConfig): array
     {
@@ -44,9 +38,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
             $inputType  = sprintf('%sInput', $type);
 
             $access = [];
-            if ($permission) {
-                $access = ['access' => sprintf('@=perm("%s")', $permission)];
-            }
+            // $access = $this->getAccess($builderConfig, $type);
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_CREATE)) {
                 $properties[$nameCreate]= [
