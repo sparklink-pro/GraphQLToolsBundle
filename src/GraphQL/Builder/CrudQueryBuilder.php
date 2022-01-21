@@ -23,6 +23,9 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
+            if ('Position' !== $type) {
+                continue;
+            }
             if (!\array_key_exists('operations', $configuration)) {
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
@@ -46,11 +49,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             }
 
             $filters = $configuration['filters'] ?? [];
-            $orders  = $configuration['list']['orderBy'] ?? ['id' => 'ASC'];
-
-            if (!\is_array($orders)) {
-                $orders = [$orders];
-            }
+            $orders  = $configuration['list']['orderBy'] ?: $builderConfig['default']['list']['orderBy'] ?? ['id' => 'ASC'];
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
                 $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
