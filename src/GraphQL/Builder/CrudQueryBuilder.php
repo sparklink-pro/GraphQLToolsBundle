@@ -30,8 +30,8 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
 
-            $nameFind    = $type;
-            $nameFindAll = sprintf('%sList', $type);
+            $nameFind    = $this->getNameOperation($builderConfig, $type, self::OPERATION_GET);
+            $nameFindAll = $this->getNameOperation($builderConfig, $type, self::OPERATION_LIST);
             $payloadType = sprintf('%sPayload', $nameFindAll);
             $access      = [];
 

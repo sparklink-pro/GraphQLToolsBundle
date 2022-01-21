@@ -26,11 +26,12 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
 
-            $idType = $configuration['idType'] ?? 'Int';
+            // Implement in the future
+            $idType     = $configuration['idType'] ?? 'Int';
 
-            $nameCreate = sprintf('%sCreate', $type);
-            $nameUpdate = sprintf('%sUpdate', $type);
-            $nameDelete = sprintf('%sDelete', $type);
+            $nameCreate = $this->getNameOperation($builderConfig, $type, self::OPERATION_CREATE);
+            $nameUpdate = $this->getNameOperation($builderConfig, $type, self::OPERATION_UPDATE);
+            $nameDelete = $this->getNameOperation($builderConfig, $type, self::OPERATION_DELETE);
             $inputType  = sprintf('%sInput', $type);
 
             $access = [];

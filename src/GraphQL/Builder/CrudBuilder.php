@@ -84,14 +84,31 @@ abstract class CrudBuilder implements MappingInterface
         return [];
     }
 
-            }
-            if (\array_key_exists('permission', $defaultConfig[$operation])) {
-                $access = ['access' => sprintf("@=hasRole('%s')", $defaultConfig[$operation]['permission'])];
+    protected function getNameOperation(array $builderConfig, string $type, string $operation): string
+    {
+        $nameOperation = sprintf('%s%s', $type, ucfirst('get' !== $operation ? $operation : ''));
 
-                return $access;
+        $typeConfig = $builderConfig['types'][$type];
+        if (\array_key_exists($operation, $typeConfig)) {
+            if (\array_key_exists('name', $typeConfig[$operation])) {
+                return $this->replaceName($typeConfig[$operation]['name'], $type);
             }
         }
 
-        return [];
+        $defaultConfig = $builderConfig['default'];
+        if (\array_key_exists($operation, $defaultConfig)) {
+            if (\array_key_exists('name', $defaultConfig[$operation])) {
+                return $this->replaceName($defaultConfig[$operation]['name'], $type);
+            }
+        }
+
+        return $nameOperation;
+    }
+
+    private function replaceName(string $name, $type): string
+    {
+        $name = str_replace('<Type>', $type, $name);
+
+        return $name;
     }
 }
