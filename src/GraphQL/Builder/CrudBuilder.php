@@ -30,6 +30,10 @@ abstract class CrudBuilder implements MappingInterface
     {
         $typeConfig = $builderConfig['types'][$type];
 
+        if (!\array_key_exists('operations', $typeConfig)) {
+            return false;
+        }
+
         if (\is_string($typeConfig['operations']) && 'all' === $typeConfig['operations']) {
             return true;
         }
@@ -43,27 +47,43 @@ abstract class CrudBuilder implements MappingInterface
     protected function getAccess(array $builderConfig, string $type, string $operation): array
     {
         $typeConfig = $builderConfig['types'][$type];
-
         if (\array_key_exists($operation, $typeConfig)) {
-            if (\array_key_exists('access', $typeConfig[$operation])) {
-                $access = ['access' => $typeConfig[$operation]['access']];
-
-                return $access;
+            if (\array_key_exists('access', $typeConfig[$operation]) || \array_key_exists('permission', $typeConfig[$operation])) {
+                return $this->configureAccess($typeConfig[$operation]);
             }
+        }
 
-            if (\array_key_exists('permission', $typeConfig[$operation])) {
-                $access = ['access' => sprintf("@=hasRole('%s')", $typeConfig[$operation]['permission'])];
-
-                return $access;
-            }
+        if (\array_key_exists('access', $typeConfig) || \array_key_exists('permission', $typeConfig)) {
+            return $this->configureAccess($typeConfig);
         }
 
         $defaultConfig = $builderConfig['default'];
         if (\array_key_exists($operation, $defaultConfig)) {
-            if (\array_key_exists('access', $defaultConfig[$operation])) {
-                $access = ['access' => $defaultConfig[$operation]['access']];
+            if (\array_key_exists('access', $defaultConfig[$operation]) || \array_key_exists('permission', $defaultConfig[$operation])) {
+                return $this->configureAccess($defaultConfig[$operation]);
+            }
+        }
 
-                return $access;
+        return $this->configureAccess($builderConfig['default']);
+    }
+
+    private function configureAccess($config)
+    {
+        if (\array_key_exists('access', $config)) {
+            $access = ['access' => $config['access']];
+
+            return $access;
+        }
+
+        if (\array_key_exists('permission', $config)) {
+            $access = ['access' => sprintf("@=hasRole('%s')", $config['permission'])];
+
+            return $access;
+        }
+
+        return [];
+    }
+
             }
             if (\array_key_exists('permission', $defaultConfig[$operation])) {
                 $access = ['access' => sprintf("@=hasRole('%s')", $defaultConfig[$operation]['permission'])];

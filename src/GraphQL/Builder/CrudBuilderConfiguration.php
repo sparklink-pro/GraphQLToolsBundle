@@ -88,8 +88,6 @@ class CrudBuilderConfiguration implements ConfigurationInterface
             ->end();
 
         return $this->addAccessConfig($rootNode);
-
-        // return $rootNode;
     }
 
     public function addAccessConfig(ArrayNodeDefinition $rootNode)
