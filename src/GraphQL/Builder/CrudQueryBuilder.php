@@ -23,9 +23,6 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
-            if ('Position' !== $type) {
-                continue;
-            }
             if (!\array_key_exists('operations', $configuration)) {
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
@@ -53,7 +50,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
                 $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
                 $public                   = $this->getPublic($builderConfig, $type, self::OPERATION_LIST);
-                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'];
+                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'] ?? [];
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),

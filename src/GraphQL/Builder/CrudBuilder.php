@@ -37,6 +37,7 @@ abstract class CrudBuilder implements MappingInterface
         if (\is_string($typeConfig['operations']) && 'all' === $typeConfig['operations']) {
             return true;
         }
+
         if (\is_array($typeConfig['operations'])) {
             return \in_array($operation, $typeConfig['operations']) || \in_array('all', $typeConfig['operations']);
         }
@@ -77,7 +78,6 @@ abstract class CrudBuilder implements MappingInterface
         $typeConfig    = $builderConfig['types'][$type];
         $defaultConfig = $builderConfig['default'];
 
-        // dd($operation);
         // type.operation
         if (\array_key_exists($operation, $typeConfig)) {
             if (\array_key_exists('public', $typeConfig[$operation])) {
@@ -98,7 +98,11 @@ abstract class CrudBuilder implements MappingInterface
         }
 
         // default.all
-        return ['public' => $defaultConfig['public']];
+        if (\array_key_exists('public', $defaultConfig)) {
+            return ['public' => $defaultConfig['public']];
+        }
+
+        return [];
     }
 
     protected function getNameOperation(array $builderConfig, string $type, string $operation): string
