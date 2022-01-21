@@ -23,9 +23,6 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
-            if ('Position' !== $type) {
-                continue;
-            }
             if (!\array_key_exists('operations', $configuration)) {
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
