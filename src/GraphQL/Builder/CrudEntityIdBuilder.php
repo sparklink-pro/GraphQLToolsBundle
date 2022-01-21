@@ -8,12 +8,14 @@ use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudEntityIdBuilder extends CrudBuilder implements MappingInterface
 {
-    public function toMappingDefinition(array $configTypes): array
+    public function toMappingDefinition(array $builderConfig): array
     {
+        $configuration = $this->getConfiguration($builderConfig);
+
         $resolver = 'graphql_resolver';
         $types    = [];
 
-        $configTypes = $configTypes['types'];
+        $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
             $entityIdType = $this->getEntityIdType($type);

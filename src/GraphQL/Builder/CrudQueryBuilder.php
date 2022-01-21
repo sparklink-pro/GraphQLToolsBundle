@@ -20,7 +20,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $properties = [];
         $types      = [];
 
-        $configTypes = $builderConfig['types'];
+        $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
             if (!\array_key_exists('operations', $configuration)) {
@@ -30,20 +30,20 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             $nameFind    = $type;
             $nameFindAll = sprintf('%sList', $type);
             $payloadType = sprintf('%sPayload', $nameFindAll);
+            $access      = [];
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_GET)) {
-                $properties[$nameFind] = [
+                $access                 = $this->getAccess($builderConfig, $type, self::OPERATION_GET);
+
+                $properties[$nameFind]  = [
                     'args' => [
                         'id' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
                     ],
                     'description' => sprintf('Find a %s by id', $type),
                     'type'        => $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").item, %s)', $manager, $type, '[args["id"]]'),
-                ];
+                ] + $access;
             }
-
-            $access = [];
-            // $access = $this->getAccess($builderConfig, $type);
 
             $filters = $configuration['filters'] ?? [];
             $orders  = $configuration['list']['orderBy'] ?? ['id' => 'ASC'];
@@ -53,6 +53,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             }
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
+                $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),
@@ -69,7 +70,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                         'items' => sprintf('[%s!]!', $type),
                     ],
                 ],
-            ] + $access;
+            ];
         }
 
         return [

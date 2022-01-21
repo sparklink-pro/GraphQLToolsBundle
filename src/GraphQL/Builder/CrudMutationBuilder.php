@@ -15,22 +15,18 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
 
     public function toMappingDefinition(array $builderConfig): array
     {
+        $configuration = $this->getConfiguration($builderConfig);
+
         $manager    = 'sparklink.types_manager';
         $properties = [];
 
-        $configTypes = $builderConfig['types'];
+        $configTypes = $configuration['types'];
         foreach ($configTypes as $type => $configuration) {
-            if ('Position' !== $type) {
-                continue;
-            }
-
             if (!\array_key_exists('operations', $configuration)) {
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
 
             $idType = $configuration['idType'] ?? 'Int';
-
-            $permission  = $configuration['permission'] ?? false;
 
             $nameCreate = sprintf('%sCreate', $type);
             $nameUpdate = sprintf('%sUpdate', $type);
@@ -38,9 +34,9 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
             $inputType  = sprintf('%sInput', $type);
 
             $access = [];
-            // $access = $this->getAccess($builderConfig, $type);
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_CREATE)) {
+                $access                 = $this->getAccess($builderConfig, $type, self::OPERATION_CREATE);
                 $properties[$nameCreate]= [
                     'args' => [
                         'input' => ['type' => $inputType],
@@ -52,6 +48,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
             }
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_UPDATE)) {
+                $access                  = $this->getAccess($builderConfig, $type, self::OPERATION_UPDATE);
                 $properties[$nameUpdate] = [
                     'args' => [
                         'item'  => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
@@ -64,6 +61,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
             }
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_DELETE)) {
+                $access                  = $this->getAccess($builderConfig, $type, self::OPERATION_DELETE);
                 $properties[$nameDelete] = [
                         'args' => [
                             'item' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],

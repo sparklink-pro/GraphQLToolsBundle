@@ -40,29 +40,36 @@ abstract class CrudBuilder implements MappingInterface
         throw new Exception('Invalid "operations" key in configuration for type "'.$type.'".');
     }
 
-    protected function getAccess(array $builderConfig, string $type): array
+    protected function getAccess(array $builderConfig, string $type, string $operation): array
     {
-        if (\array_key_exists('access', $builderConfig['types'][$type])) {
-            $access = ['access' => $builderConfig['types'][$type]['access']];
+        $typeConfig = $builderConfig['types'][$type];
 
-            return $access;
+        if (\array_key_exists($operation, $typeConfig)) {
+            if (\array_key_exists('access', $typeConfig[$operation])) {
+                $access = ['access' => $typeConfig[$operation]['access']];
+
+                return $access;
+            }
+
+            if (\array_key_exists('permission', $typeConfig[$operation])) {
+                $access = ['access' => sprintf("@=hasRole('%s')", $typeConfig[$operation]['permission'])];
+
+                return $access;
+            }
         }
 
-        if (\array_key_exists('permission', $builderConfig['types'][$type])) {
-            $access = ['access' => sprintf("@=hasRole('%s')", $builderConfig['types'][$type]['permission'])];
+        $defaultConfig = $builderConfig['default'];
+        if (\array_key_exists($operation, $defaultConfig)) {
+            if (\array_key_exists('access', $defaultConfig[$operation])) {
+                $access = ['access' => $defaultConfig[$operation]['access']];
 
-            return $access;
-        }
+                return $access;
+            }
+            if (\array_key_exists('permission', $defaultConfig[$operation])) {
+                $access = ['access' => sprintf("@=hasRole('%s')", $defaultConfig[$operation]['permission'])];
 
-        if (\array_key_exists('access', $builderConfig)) {
-            $access = ['access' => $builderConfig['access']];
-
-            return $access;
-        }
-        if (\array_key_exists('permission', $builderConfig)) {
-            $access = ['access' => sprintf("@=hasRole('%s')", $builderConfig['permission'])];
-
-            return $access;
+                return $access;
+            }
         }
 
         return [];
