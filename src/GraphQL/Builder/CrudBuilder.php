@@ -46,42 +46,59 @@ abstract class CrudBuilder implements MappingInterface
 
     protected function getAccess(array $builderConfig, string $type, string $operation): array
     {
-        $typeConfig = $builderConfig['types'][$type];
+        $typeConfig    = $builderConfig['types'][$type];
+        $defaultConfig = $builderConfig['default'];
+
+        // type.operation
         if (\array_key_exists($operation, $typeConfig)) {
             if (\array_key_exists('access', $typeConfig[$operation]) || \array_key_exists('permission', $typeConfig[$operation])) {
                 return $this->configureAccess($typeConfig[$operation]);
             }
         }
 
+        // type.all
         if (\array_key_exists('access', $typeConfig) || \array_key_exists('permission', $typeConfig)) {
             return $this->configureAccess($typeConfig);
         }
 
-        $defaultConfig = $builderConfig['default'];
+        // default.operation
         if (\array_key_exists($operation, $defaultConfig)) {
             if (\array_key_exists('access', $defaultConfig[$operation]) || \array_key_exists('permission', $defaultConfig[$operation])) {
                 return $this->configureAccess($defaultConfig[$operation]);
             }
         }
 
+        // default.all
         return $this->configureAccess($builderConfig['default']);
     }
 
-    private function configureAccess($config)
+    protected function getPublic(array $builderConfig, string $type, string $operation): array
     {
-        if (\array_key_exists('access', $config)) {
-            $access = ['access' => $config['access']];
+        $typeConfig    = $builderConfig['types'][$type];
+        $defaultConfig = $builderConfig['default'];
 
-            return $access;
+        // dd($operation);
+        // type.operation
+        if (\array_key_exists($operation, $typeConfig)) {
+            if (\array_key_exists('public', $typeConfig[$operation])) {
+                return ['public' => $typeConfig[$operation]['public']];
+            }
         }
 
-        if (\array_key_exists('permission', $config)) {
-            $access = ['access' => sprintf("@=hasRole('%s')", $config['permission'])];
-
-            return $access;
+        // type.all
+        if (\array_key_exists('public', $typeConfig)) {
+            return ['public' => $typeConfig['public']];
         }
 
-        return [];
+        // default.operation
+        if (\array_key_exists($operation, $defaultConfig)) {
+            if (\array_key_exists('public', $defaultConfig[$operation])) {
+                return ['public' => $defaultConfig[$operation]['public']];
+            }
+        }
+
+        // default.all
+        return ['public' => $defaultConfig['public']];
     }
 
     protected function getNameOperation(array $builderConfig, string $type, string $operation): string
@@ -110,5 +127,22 @@ abstract class CrudBuilder implements MappingInterface
         $name = str_replace('<Type>', $type, $name);
 
         return $name;
+    }
+
+    private function configureAccess($config)
+    {
+        if (\array_key_exists('access', $config)) {
+            $access = ['access' => $config['access']];
+
+            return $access;
+        }
+
+        if (\array_key_exists('permission', $config)) {
+            $access = ['access' => sprintf("@=hasRole('%s')", $config['permission'])];
+
+            return $access;
+        }
+
+        return [];
     }
 }

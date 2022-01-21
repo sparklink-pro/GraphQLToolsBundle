@@ -23,6 +23,9 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
+            if ('Position' !== $type) {
+                continue;
+            }
             if (!\array_key_exists('operations', $configuration)) {
                 throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
             }
@@ -30,10 +33,10 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             $nameFind    = $this->getNameOperation($builderConfig, $type, self::OPERATION_GET);
             $nameFindAll = $this->getNameOperation($builderConfig, $type, self::OPERATION_LIST);
             $payloadType = sprintf('%sPayload', $nameFindAll);
-            $access      = [];
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_GET)) {
                 $access                 = $this->getAccess($builderConfig, $type, self::OPERATION_GET);
+                $public                 = $this->getPublic($builderConfig, $type, self::OPERATION_GET);
 
                 $properties[$nameFind]  = [
                     'args' => [
@@ -42,21 +45,22 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     'description' => sprintf('Find a %s by id', $type),
                     'type'        => $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").item, %s)', $manager, $type, '[args["id"]]'),
-                ] + $access;
+                ] + $access + $public;
             }
 
             $filters = $configuration['filters'] ?? [];
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
-                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'];
                 $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
+                $public                   = $this->getPublic($builderConfig, $type, self::OPERATION_LIST);
+                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'];
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),
                     'type'        => $payloadType,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[args.getArrayCopy(), %s]', $orderBy)),
                     'args'        => $filters,
-                ] + $access;
+                ] + $access + $public;
             }
 
             $types[$payloadType] = [
