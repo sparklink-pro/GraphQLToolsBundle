@@ -46,9 +46,9 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
             }
 
             $filters = $configuration['filters'] ?? [];
-            $orders  = $configuration['list']['orderBy'] ?: $builderConfig['default']['list']['orderBy'] ?? ['id' => 'ASC'];
 
             if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
+                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'];
                 $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
