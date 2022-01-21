@@ -24,36 +24,50 @@ class CrudBuilderConfiguration implements ConfigurationInterface
         $rootNode    = $treeBuilder->getRootNode();
         $rootNode
             ->children()
+                // default
                 ->append($this->addOperationsConfig())
+
+                // types
                 ->arrayNode('types')->useAttributeAsKey('types')->prototype('array')
+                    ->validate()
+                        ->always(function ($v) {
+                            if (null !== $v['access'] && null !== $v['permission']) {
+                                throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys in configuration for type "operations".');
+                            }
+
+                            return $v;
+                        })
+                    ->end()
                     ->children()
-                        ->arrayNode('operations')
-                            ->beforeNormalization()->ifString()->castToArray()->end()
-                            ->isRequired()
-                            ->prototype('scalar')->end()
-                            ->validate()
-                                ->always(function ($v) {
-                                    foreach ($v as $value) {
-                                        if ('all' === $value) {
+                        ->scalarNode('permission')->defaultNull()->end()
+                        ->scalarNode('access')->defaultNull()->end()
+                            ->arrayNode('operations')
+                                ->beforeNormalization()->ifString()->castToArray()->end()
+                                ->prototype('scalar')->end()
+                                ->validate()
+                                    ->always(function ($v) {
+                                        foreach ($v as $value) {
+                                            if ('all' === $value) {
+                                                return $v;
+                                            }
+                                            if (!\in_array($value, self::ALL_OPERATIONS)) {
+                                                throw new \InvalidArgumentException(sprintf('Invalid value "%s" for "operations" key in configuration for type "operations".', $value));
+                                            }
+
                                             return $v;
                                         }
-                                        if (!\in_array($value, self::ALL_OPERATIONS)) {
-                                            throw new \InvalidArgumentException(sprintf('Invalid value "%s" for "operations" key in configuration for type "operations".', $value));
-                                        }
-
-                                        return $v;
-                                    }
-                                })
+                                    })
+                                ->end()
                             ->end()
+                            ->append($this->addOperationGetConfig())
+                            ->append($this->addOperationListConfig())
+                            ->append($this->addOperationCreateConfig())
+                            ->append($this->addOperationUpdateConfig())
+                            ->append($this->addOperationDeleteConfig())
                         ->end()
-                        ->append($this->addOperationGetConfig())
-                        ->append($this->addOperationListConfig())
-                        ->append($this->addOperationCreateConfig())
-                        ->append($this->addOperationUpdateConfig())
-                        ->append($this->addOperationDeleteConfig())
                     ->end()
-                ->end()
-            ->end()
+             ->end()
+        ->end()
         ;
 
         return $treeBuilder;
@@ -73,7 +87,9 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                 ->append($this->addOperationDeleteConfig())
             ->end();
 
-        return $rootNode;
+        return $this->addAccessConfig($rootNode);
+
+        // return $rootNode;
     }
 
     public function addAccessConfig(ArrayNodeDefinition $rootNode)
@@ -92,8 +108,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                 ->scalarNode('permission')->defaultNull()->end()
                 ->scalarNode('access')->defaultNull()->end()
                 ->scalarNode('name')->defaultNull()->end()
-            ->end()
-        ->end();
+            ->end();
 
         return $rootNode;
     }
