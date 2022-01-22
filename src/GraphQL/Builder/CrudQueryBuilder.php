@@ -58,16 +58,16 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[args.getArrayCopy(), %s]', $orderBy)),
                     'args'        => $filters,
                 ] + $access + $public;
-            }
 
-            $types[$payloadType] = [
-                'type'   => 'object',
-                'config' => [
-                    'fields' => [
-                        'items' => sprintf('[%s!]!', $type),
+                $types[$payloadType] = [
+                    'type'   => 'object',
+                    'config' => [
+                        'fields' => [
+                            'items' => sprintf('[%s!]!', $type),
+                        ],
                     ],
-                ],
-            ];
+                ];
+            }
         }
 
         return [
