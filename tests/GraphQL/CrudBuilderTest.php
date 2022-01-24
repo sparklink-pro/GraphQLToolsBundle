@@ -10,7 +10,7 @@ use Sparklink\GraphQLToolsBundle\GraphQL\Builder\CrudMutationBuilder;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\CrudQueryBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
-class BuilderTest extends TestCase
+class CrudBuilderTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -26,13 +26,10 @@ class BuilderTest extends TestCase
                 'create' => [
                     'name' => 'Create<Type>',
                 ],
-                // 'permission' => 'ROLE_ADMIN',
-                // 'access'     => 'popo',
             ],
             'types'=> [
                 'TEST'   => ['operations' => 'all'],
                 'TEST2'  => [
-                    // 'entity_id'  => false,
                     'operations' => ['delete', 'update'],
                 ],
                 'TEST3' => [
@@ -85,11 +82,6 @@ class BuilderTest extends TestCase
 
         //check TEST 6
         $this->assertArrayNotHasKey('TEST6Id', $this->getToMappingDefinition($this->entityIdBuilder, $config)['types']);
-    }
-
-    private function getToMappingDefinition($builder, $config)
-    {
-        return $builder->toMappingDefinition($config);
     }
 
     public function testPermission(): void
@@ -240,6 +232,11 @@ class BuilderTest extends TestCase
         $method->setAccessible(true);
 
         return $method->invokeArgs($obj, $args);
+    }
+
+    private function getToMappingDefinition($builder, $config)
+    {
+        return $builder->toMappingDefinition($config);
     }
 
     /**
