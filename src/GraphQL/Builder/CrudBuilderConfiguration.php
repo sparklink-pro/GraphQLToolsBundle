@@ -15,8 +15,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
     public const CREATE         = 'create';
     public const UPDATE         = 'update';
     public const DELETE         = 'delete';
-    public const ALL            = 'all';
-    public const ALL_OPERATIONS = [self::ALL, self::GET, self::LIST, self::CREATE, self::UPDATE, self::DELETE];
+    public const ALL_OPERATIONS = [self::GET, self::LIST, self::CREATE, self::UPDATE, self::DELETE];
 
     public function getConfigTreeBuilder()
     {
@@ -32,7 +31,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                     ->validate()
                         ->always(function ($v) {
                             if (null !== $v['access'] && null !== $v['permission']) {
-                                throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys in configuration for type "operations".');
+                                throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys on same level.');
                             }
 
                             return $v;
@@ -41,22 +40,23 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('permission')->defaultNull()->end()
                         ->scalarNode('access')->defaultNull()->end()
-                        ->scalarNode('public')->defaultFalse()->end()
-                            ->arrayNode('operations')
-                                ->beforeNormalization()->ifString()->castToArray()->end()
-                                ->prototype('scalar')->end()
+                        ->scalarNode('public')->defaultNull()->end()
+                        ->scalarNode('entity_id')->defaultTrue()->end()
+                            ->variableNode('operations')
                                 ->validate()
                                     ->always(function ($v) {
-                                        foreach ($v as $value) {
-                                            if ('all' === $value) {
-                                                return $v;
-                                            }
-                                            if (!\in_array($value, self::ALL_OPERATIONS)) {
-                                                throw new \InvalidArgumentException(sprintf('Invalid value "%s" for "operations" key in configuration for type "operations".', $value));
-                                            }
-
-                                            return $v;
+                                        if (\is_string($v) && 'all' !== $v) {
+                                            throw new \InvalidArgumentException('Only "all" is supported for "operations" key.');
                                         }
+                                        if (\is_array($v)) {
+                                            foreach ($v as $value) {
+                                                if (!\in_array($value, self::ALL_OPERATIONS)) {
+                                                    throw new \InvalidArgumentException(sprintf('Invalid value "%s" for "operations" key in configuration for type "operations".', $value));
+                                                }
+                                            }
+                                        }
+
+                                        return $v;
                                     })
                                 ->end()
                             ->end()
@@ -67,7 +67,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                             ->append($this->addOperationDeleteConfig())
                         ->end()
                     ->end()
-             ->end()
+            ->end()
         ->end()
         ;
 
@@ -80,7 +80,8 @@ class CrudBuilderConfiguration implements ConfigurationInterface
         $rootNode    = $treeBuilder->getRootNode();
 
         $rootNode
-            ->children()
+        ->addDefaultsIfNotSet()
+        ->children()
                 ->append($this->addOperationGetConfig())
                 ->append($this->addOperationListConfig())
                 ->append($this->addOperationCreateConfig())
@@ -97,7 +98,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
             ->validate()
                 ->always(function ($v) {
                     if (null !== $v['access'] && null !== $v['permission']) {
-                        throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys in configuration for type "operations".');
+                        throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys on same level.');
                     }
 
                     return $v;

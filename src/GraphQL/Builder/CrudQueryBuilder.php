@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\GraphQL\Builder;
 
-use Error;
 use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudQueryBuilder extends CrudBuilder implements MappingInterface
@@ -22,18 +21,14 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
 
         $configTypes = $configuration['types'];
 
-        foreach ($configTypes as $type => $configuration) {
-            if (!\array_key_exists('operations', $configuration)) {
-                throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
-            }
-
-            $nameFind    = $this->getNameOperation($builderConfig, $type, self::OPERATION_GET);
-            $nameFindAll = $this->getNameOperation($builderConfig, $type, self::OPERATION_LIST);
+        foreach ($configTypes as $type => $configType) {
+            $nameFind    = $this->getNameOperation($configuration, $type, self::OPERATION_GET);
+            $nameFindAll = $this->getNameOperation($configuration, $type, self::OPERATION_LIST);
             $payloadType = sprintf('%sPayload', $nameFindAll);
 
-            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_GET)) {
-                $access                 = $this->getAccess($builderConfig, $type, self::OPERATION_GET);
-                $public                 = $this->getPublic($builderConfig, $type, self::OPERATION_GET);
+            if ($this->isOperationActive($configuration, $type, self::OPERATION_GET)) {
+                $access                 = $this->getAccess($configuration, $type, self::OPERATION_GET);
+                $public                 = $this->getPublic($configuration, $type, self::OPERATION_GET);
 
                 $properties[$nameFind]  = [
                     'args' => [
@@ -42,15 +37,16 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     'description' => sprintf('Find a %s by id', $type),
                     'type'        => $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").item, %s)', $manager, $type, '[args["id"]]'),
-                ] + $access + $public;
+                    ] + $access + $public;
             }
 
-            $filters = $configuration['filters'] ?? [];
+            $filters = $configType['filters'] ?? [];
 
-            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_LIST)) {
-                $access                   = $this->getAccess($builderConfig, $type, self::OPERATION_LIST);
-                $public                   = $this->getPublic($builderConfig, $type, self::OPERATION_LIST);
-                $orders                   = $configuration['list']['orderBy'] ?? $builderConfig['default']['list']['orderBy'] ?? [];
+            if ($this->isOperationActive($configuration, $type, self::OPERATION_LIST)) {
+                $access                   = $this->getAccess($configuration, $type, self::OPERATION_LIST);
+                $public                   = $this->getPublic($configuration, $type, self::OPERATION_LIST);
+                $orders                   = $configType['list']['orderBy'] ?? $configuration['default']['list']['orderBy'] ?? [];
+
                 $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\GraphQL\Builder;
 
-use Error;
 use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudMutationBuilder extends CrudBuilder implements MappingInterface
@@ -21,57 +20,53 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
         $properties = [];
 
         $configTypes = $configuration['types'];
-        foreach ($configTypes as $type => $configuration) {
-            if (!\array_key_exists('operations', $configuration)) {
-                throw new Error('Missing "operations" key in configuration for type "'.$type.'".');
-            }
-
+        foreach ($configTypes as $type => $configType) {
             // Implement in the future
-            $idType     = $configuration['idType'] ?? 'Int';
+            $idType     = $configType['idType'] ?? 'Int';
 
-            $nameCreate = $this->getNameOperation($builderConfig, $type, self::OPERATION_CREATE);
-            $nameUpdate = $this->getNameOperation($builderConfig, $type, self::OPERATION_UPDATE);
-            $nameDelete = $this->getNameOperation($builderConfig, $type, self::OPERATION_DELETE);
+            $nameCreate = $this->getNameOperation($configuration, $type, self::OPERATION_CREATE);
+            $nameUpdate = $this->getNameOperation($configuration, $type, self::OPERATION_UPDATE);
+            $nameDelete = $this->getNameOperation($configuration, $type, self::OPERATION_DELETE);
             $inputType  = sprintf('%sInput', $type);
 
             $access = [];
 
-            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_CREATE)) {
-                $access                 = $this->getAccess($builderConfig, $type, self::OPERATION_CREATE);
-                $public                 = $this->getPublic($builderConfig, $type, self::OPERATION_CREATE);
+            if ($this->isOperationActive($configuration, $type, self::OPERATION_CREATE)) {
+                $access                 = $this->getAccess($configuration, $type, self::OPERATION_CREATE);
+                $public                 = $this->getPublic($configuration, $type, self::OPERATION_CREATE);
                 $properties[$nameCreate]= [
                     'args' => [
                         'input' => ['type' => $inputType],
                     ],
                     'description' => sprintf('Create a %s', $type),
-                    'type'        => $configuration['mutationType'] ?? $type,
+                    'type'        => $configType['mutationType'] ?? $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").create, arguments({ input: "%s"}, args))', $manager, $type, $inputType),
                     ] + $access + $public;
             }
 
-            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_UPDATE)) {
-                $access                  = $this->getAccess($builderConfig, $type, self::OPERATION_UPDATE);
-                $public                  = $this->getPublic($builderConfig, $type, self::OPERATION_UPDATE);
+            if ($this->isOperationActive($configuration, $type, self::OPERATION_UPDATE)) {
+                $access                  = $this->getAccess($configuration, $type, self::OPERATION_UPDATE);
+                $public                  = $this->getPublic($configuration, $type, self::OPERATION_UPDATE);
                 $properties[$nameUpdate] = [
                     'args' => [
                         'item'  => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
                         'input' => ['type' => sprintf('%s!', $inputType)],
                     ],
                     'description' => sprintf('Update or create an object of type %s', $type),
-                    'type'        => $configuration['mutationType'] ?? $type,
+                    'type'        => $configType['mutationType'] ?? $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({item: "%s", input: "%s"}, args))', $manager, $type, $idType, $inputType),
                     ] + $access + $public;
             }
 
-            if ($this->isOperationActive($builderConfig, $type, self::OPERATION_DELETE)) {
-                $access                  = $this->getAccess($builderConfig, $type, self::OPERATION_DELETE);
-                $public                  = $this->getPublic($builderConfig, $type, self::OPERATION_DELETE);
+            if ($this->isOperationActive($configuration, $type, self::OPERATION_DELETE)) {
+                $access                  = $this->getAccess($configuration, $type, self::OPERATION_DELETE);
+                $public                  = $this->getPublic($configuration, $type, self::OPERATION_DELETE);
                 $properties[$nameDelete] = [
                         'args' => [
                             'item' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
                         ],
                         'description' => sprintf('Remove a object of type %s', $type),
-                        'type'        => $configuration['mutationType'] ?? 'Boolean',
+                        'type'        => $configType['mutationType'] ?? 'Boolean',
                         'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $idType),
                     ] + $access + $public;
             }

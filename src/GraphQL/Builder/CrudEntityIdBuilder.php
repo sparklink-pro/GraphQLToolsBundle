@@ -18,6 +18,9 @@ class CrudEntityIdBuilder extends CrudBuilder implements MappingInterface
         $configTypes = $configuration['types'];
 
         foreach ($configTypes as $type => $configuration) {
+            if (\array_key_exists('entity_id', $configuration) && false === $configuration['entity_id']) {
+                continue;
+            }
             $entityIdType = $this->getEntityIdType($type);
 
             $types[$entityIdType] = [
