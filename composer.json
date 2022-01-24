@@ -29,12 +29,19 @@
     },
     "autoload": {
         "psr-4": {
-            "Sparklink\\GraphQLToolsBundle\\": "src/"
+            "Sparklink\\GraphQLToolsBundle\\": "src/",
+            "Sparklink\\GraphQLToolsBundle\\Tests\\": "tests/"
         }
     },
     "extra": {
         "branch-alias": {
             "dev-master": "1.0.x-dev"
         }
+    },
+    "require-dev": {
+        "overblog/graphql-bundle": "^0.14.1",
+        "phpunit/phpunit": "^9.5",
+        "symfony/phpunit-bridge": "^6.0",
+        "symfony/test-pack": "^1.0"
     }
 }
