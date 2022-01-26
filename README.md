@@ -46,6 +46,7 @@ class CrudConfig
         ],
         'types'  => [
             'Car' => [
+                'permission' => 'ROLE_ADMIN',
                 'operations'  => ['get', 'list', 'create', 'update', 'delete'],
                 'list'        => [
                     'permission'     => 'ROLE_USER',
@@ -68,7 +69,7 @@ class CrudConfig
                 ],
             ],
             'Bike'    => [
-                // Will thriow, because both "permission" and "access" are set as "permission" is a shortcut for "access".
+                // Will throw an error, because both "permission" and "access" are set as "permission" is a shortcut for "access".
                 'permission'  => 'ROLE_ADMIN',
                 'access'      => '@=hasRole("ROLE_ADMIN")',
                 'list'        => [
@@ -83,7 +84,8 @@ class CrudConfig
 
 ## Custom Manager
 
-By default all types uses the same `DefaultEntityTypeManager` but you can redefine it.
+By default all types uses the same [`DefaultEntityTypeManager`](src/Manager/DefaultEntityTypeManager.php) but you can redefine it.
+/Volumes/x/dev/gh/GraphQLToolsBundle/src/Manager/DefaultEntityTypeManager.php
 
 ```yaml
 # config/services.yaml
