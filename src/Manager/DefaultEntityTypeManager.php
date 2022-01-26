@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sparklink\GraphQLToolsBundle\Manager;
 
 use Doctrine\Persistence\ManagerRegistry;
+use GraphQL\Type\Definition\ResolveInfo;
 use Overblog\GraphQLBundle\Error\InvalidArgumentError;
 use Overblog\GraphQLBundle\Error\InvalidArgumentsError;
 use Overblog\GraphQLBundle\Error\UserError;
@@ -59,12 +60,23 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $this->getEntityManager()->getRepository($this->entityClass);
     }
 
-    public function list($config, $orderBy): array
+    /**
+     * @param $criterias array       List of criterias to filter the result set by the crud query builder from configuration
+     * @param $orders    array       List of orderBy to sort the result set by the crud query builder from configuration
+     * @param $args      array       List of GraphQL query arguments
+     * @param $info      ResolveInfo associated with the query
+     */
+    public function list(array $criterias = [], array $orderBy = [], array $args = [], ResolveInfo $info = null): array
     {
-        return ['items' => $this->getRepository()->findBy([], $orderBy)];
+        return ['items' => $this->getRepository()->findBy($criterias, $orderBy)];
     }
 
-    public function item($entity)
+    /**
+     * @param $entity object      The resolved entity through the EntityId scalar
+     * @param $args   array       List of GraphQL query arguments
+     * @param $info   ResolveInfo associated with the query
+     */
+    public function item(object $entity, array $args = [], ResolveInfo $info = null)
     {
         return $entity;
     }
