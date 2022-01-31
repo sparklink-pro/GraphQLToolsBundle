@@ -41,7 +41,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                     'description' => sprintf('Create a %s', $type),
                     'type'        => $configType['mutationType'] ?? $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").create, arguments({ input: "%s"}, args))', $manager, $type, $inputType),
-                    ] + $access + $public;
+                ] + $access + $public;
             }
 
             if ($this->isOperationActive($configuration, $type, self::OPERATION_UPDATE)) {
@@ -55,20 +55,20 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                     'description' => sprintf('Update or create an object of type %s', $type),
                     'type'        => $configType['mutationType'] ?? $type,
                     'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({item: "%s", input: "%s"}, args))', $manager, $type, $idType, $inputType),
-                    ] + $access + $public;
+                ] + $access + $public;
             }
 
             if ($this->isOperationActive($configuration, $type, self::OPERATION_DELETE)) {
                 $access                  = $this->getAccess($configuration, $type, self::OPERATION_DELETE);
                 $public                  = $this->getPublic($configuration, $type, self::OPERATION_DELETE);
                 $properties[$nameDelete] = [
-                        'args' => [
-                            'item' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
-                        ],
-                        'description' => sprintf('Remove a object of type %s', $type),
-                        'type'        => $configType['mutationType'] ?? 'Boolean',
-                        'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $idType),
-                    ] + $access + $public;
+                    'args' => [
+                        'item' => ['type' => sprintf('%s!', $this->getEntityIdType($type))],
+                    ],
+                    'description' => sprintf('Remove a object of type %s', $type),
+                    'type'        => $configType['mutationType'] ?? 'Boolean',
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $idType),
+                ] + $access + $public;
             }
         }
 

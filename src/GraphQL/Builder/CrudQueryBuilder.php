@@ -20,7 +20,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
         $types      = [];
 
         $configTypes = $configuration['types'];
-
+        $hasList     = false;
         foreach ($configTypes as $type => $configType) {
             $nameFind    = $this->getNameOperation($configuration, $type, self::OPERATION_GET);
             $nameFindAll = $this->getNameOperation($configuration, $type, self::OPERATION_LIST);
@@ -36,23 +36,26 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     ],
                     'description' => sprintf('Find a %s by id', $type),
                     'type'        => $type,
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").item, %s)', $manager, $type, '[args["id"]]'),
-                    ] + $access + $public;
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").item, %s)', $manager, $type, '[args["id"], args.getArrayCopy(), info]'),
+                ] + $access + $public;
             }
 
-            $filters = $configType['filters'] ?? [];
-
             if ($this->isOperationActive($configuration, $type, self::OPERATION_LIST)) {
+                $hasList                  = true;
                 $access                   = $this->getAccess($configuration, $type, self::OPERATION_LIST);
                 $public                   = $this->getPublic($configuration, $type, self::OPERATION_LIST);
+                $criterias                = $configType['list']['criterias'] ?? $configuration['default']['list']['criterias'] ?? [];
                 $orders                   = $configType['list']['orderBy'] ?? $configuration['default']['list']['orderBy'] ?? [];
 
-                $orderBy                  = sprintf('{%s}', implode(', ', array_map(fn ($property, $order) => sprintf('"%s" : "%s"', $order, $property), array_values($orders), array_keys($orders))));
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),
                     'type'        => $payloadType,
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[args.getArrayCopy(), %s]', $orderBy)),
-                    'args'        => $filters,
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[%s, %s, args.getArrayCopy(), info]', json_encode($criterias), json_encode($orders))),
+                    'args'        => [
+                        'limit'   => ['type' => 'Int'],
+                        'offset'  => ['type' => 'Int'],
+                        'orderBy' => ['type' => '[OrderListInput!]'],
+                    ],
                 ] + $access + $public;
 
                 $types[$payloadType] = [
@@ -64,6 +67,28 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     ],
                 ];
             }
+        }
+
+        if ($hasList) {
+            $types['OrderListOrder'] = [
+                'type'   => 'enum',
+                'config' => [
+                    'values' => [
+                        'ASC'  => ['value' => 'ASC'],
+                        'DESC' => ['value' => 'DESC'],
+                    ],
+                ],
+            ];
+
+            $types['OrderListInput'] = [
+                'type'   => 'input-object',
+                'config' => [
+                    'fields' => [
+                        'field' => ['type' => 'String!'],
+                        'order' => ['type' => 'OrderListOrder', 'defaultValue' => 'ASC'],
+                    ],
+                ],
+            ];
         }
 
         return [

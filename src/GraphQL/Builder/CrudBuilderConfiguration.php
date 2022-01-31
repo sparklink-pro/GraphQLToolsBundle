@@ -131,11 +131,8 @@ class CrudBuilderConfiguration implements ConfigurationInterface
 
         $rootNode
         ->children()
-            ->arrayNode('orderBy')
-                ->useAttributeAsKey('cc')
-                    ->prototype('scalar')->end()
-                ->end()
-            ->end()
+            ->arrayNode('orderBy')->ignoreExtraKeys(false)->end()
+            ->arrayNode('criterias')->ignoreExtraKeys(false)->end()
         ->end();
 
         $rootNode = $this->addAccessConfig($rootNode);

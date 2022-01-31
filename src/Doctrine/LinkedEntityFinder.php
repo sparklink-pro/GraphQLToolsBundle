@@ -20,13 +20,15 @@ class LinkedEntityFinder
 
     /**
      * Get a list of entities referencing target entity.
+     * Option to exclude entities that would be delete by cascade.
      */
-    public function getLinkedEntities(object $entity): array
+    public function getLinkedEntities(object $entity, bool $ignoreCascadeRemove = false): array
     {
         $manager    = $this->doctrine->getManager();
         $metas      = $manager->getMetadataFactory()->getAllMetadata();
 
-        $entities   = [];
+        $entities       = [];
+        $entityMetadata = $manager->getClassMetadata(\get_class($entity));
 
         foreach ($metas as $meta) {
             foreach ($meta->getAssociationNames() as $association) {
@@ -40,6 +42,13 @@ class LinkedEntityFinder
 
                     if (!$isOwningSide) {
                         continue;
+                    }
+
+                    if ($ignoreCascadeRemove && isset($mapping['inversedBy'])) {
+                        $reverseMapping = $entityMetadata->getAssociationMapping($mapping['inversedBy']);
+                        if ($reverseMapping && $reverseMapping['isCascadeRemove']) {
+                            continue;
+                        }
                     }
 
                     $isMultiple = ClassMetadataInfo::MANY_TO_MANY === $mapping['type'];
@@ -73,7 +82,7 @@ class LinkedEntityFinder
     /** Remove reference to given entity in linked entities */
     public function unlinkEntities(object $entity)
     {
-        $links    = $this->getLinkedEntities($entity);
+        $links    = $this->getLinkedEntities($entity, true);
         $accessor = (new PropertyAccessorBuilder())->getPropertyAccessor();
 
         foreach ($links as $link) {
