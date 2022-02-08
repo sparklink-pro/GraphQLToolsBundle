@@ -1,22 +1,75 @@
 # Overblog/GraphQLBundle extension & tools
 
-## Crud Builder
+
+
+Installation
+===========
+
+This bundle use the [Overblog/GraphQLBundle](https://github.com/overblog/GraphQLBundle), first you need to install it.
+
+
+1. Install the bundle:
+```bash
+composer require sparklink/graphql-tools-bundle
+```
+2. In your project's root query and mutation attach: 
+
+    In `Query`, the `CrudQuery` and `CrudEntityId` builders
+    <br>
+    ```php
+        namespace App\GraphQL\Root;
+
+        use App\GraphQL\Builder\CrudConfig;
+        use Overblog\GraphQLBundle\Annotation as GQL;
+
+        #[GQL\Type]
+        #[GQL\FieldsBuilder(name: 'CrudQuery', config: CrudConfig::CONFIG)]
+        #[GQL\FieldsBuilder(name: 'CrudEntityId', config: CrudConfig::CONFIG)]
+        class Query
+        {
+            //...
+        }
+    ```
+    In `Mutation`, the `CrudMutation` builder
+    <br>
+    ```php
+        namespace App\GraphQL\Root;
+
+        use App\GraphQL\Builder\CrudConfig;
+        use Overblog\GraphQLBundle\Annotation as GQL;
+
+        #[GQL\Type]
+        #[GQL\FieldsBuilder(name: 'CrudMutation', config: CrudConfig::CONFIG)]
+        class Mutation
+        {
+            //...
+        }   
+    ```
+
+
+
+
+Crud Builder
+===========
 
 The Crud Builder can generate CRUD operations for your GraphQL schema.
 
 It need a configuration table.
 
-|   Property   |                                                                              Description                                                                              |                                         Type                                         | Default |
-| :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------: | :-----: |
-|   default    |                                                              Configure default parameters for all types.                                                              | [`access`\|`permission`,`public`, `'get'`,`'list'`,`'create'`, `'update'`, `'list`'] |    -    |
-|    types     |                                                                                                                                                                       |                                    array:\<type>                                     |    -    |
-|   \<type>    |                                                                     Configure parameters by type.                                                                     |           [ `access`\|`permission`,`public`, `operations`, `<operation>`]            |    -    |
-|    access    |             Act like access is true if not set, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-access-control.md)              |                             string(e.g. = 'ROLE_ADMIN')                              |    -    |
-|  permission  |                                  Shortcut for access, use '@=hasRole('')'. You can't define 'permission' and 'access' in same deep.                                   |                        string(e.g. :@=hasRole('ROLE_ADMIN'))                         |    -    |
-| \<operation> |                                                Configure seperatly `'get'`,`'list'`,`'create'`, `'update'`, `'list`'.                                                 |                      [ `access`\|`permission`,`public`,`name`]                       |    -    |
-|  operations  |                                         Define operations, by default all operations are forbidden and only generate entityId                                         |            [`'get'`,`'list'`,`'create'`, `'update'`, `'list`'] \| `'all'`            |    -    |
-|    public    | Control if a operation needs to be removed from the results, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-public-control.md) |  string(e.g. :@=service('security.authorization_checker').isGranted('ROLE_ADMIN'))   |    -    |
-|     name     |               redefine the name of the operation, if in `default` config you must write \<Type> somewhere in the name (e.g. : "name" => "\<Type>List")                |                                        string                                        |    -    |
+|   Property   |                                                                              Description                                                                              |                                                Type                                                 | Default |
+| :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: | :-----: |
+|    access    |             Act like access is true if not set, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-access-control.md)              |                                     string(e.g. = 'ROLE_ADMIN')                                     |    -    |
+|  criterias   |                                                                   Only available in type operation                                                                    |                                    array: [property => criteria]                                    |    -    |
+|   default    |                                                              Configure default parameters for all types.                                                              |        [`access`\|`permission`,`public`, `'get'`,`'list'`,`'create'`, `'update'`, `'list`']         |    -    |
+|   \<type>    |                                                                     Configure parameters by type.                                                                     |                   [ `access`\|`permission`,`public`, `operations`, `<operation>`]                   |    -    |
+|     name     |               redefine the name of the operation, if in `default` config you must write \<Type> somewhere in the name (e.g. : "name" => "\<Type>List")                |                                               string                                                |    -    |
+| \<operation> |                                                Configure seperatly `'get'`,`'list'`,`'create'`, `'update'`, `'list`'.                                                 | [ `access`\|`permission`,`public`,`name`] <br> <b> in `'list'`:</b> `'orderBy[]'` & `'criterias[]'` |    -    |
+|  operations  |                                         Define operations, by default all operations are forbidden and only generate entityId                                         |                   [`'get'`,`'list'`,`'create'`, `'update'`, `'list`'] \| `'all'`                    |    -    |
+|   orderBy    |                                                                   Only available in type operation                                                                    |                                     array: [property => order]                                      |    -    |
+|  permission  |                                  Shortcut for access, use '@=hasRole('')'. You can't define 'permission' and 'access' in same deep.                                   |                                string(e.g. :@=hasRole('ROLE_ADMIN'))                                |    -    |
+|    public    | Control if a operation needs to be removed from the results, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-public-control.md) |          string(e.g. :@=service('security.authorization_checker').isGranted('ROLE_ADMIN'))          |    -    |
+|    types     |                                                                                                                                                                       |                                            array:\<type>                                            |    -    |
+
 
 **Note:** `access` and `permission` can be defined in several deeps (e.g. `default` and `<type>`). the deeper the config, the more priority it has.
 
@@ -50,6 +103,7 @@ class CrudConfig
                 'operations'  => ['get', 'list', 'create', 'update', 'delete'],
                 'list'        => [
                     'permission'     => 'ROLE_USER',
+                    // You can use orderBy to sort the list
                     'orderby'        => [
                         'name' => 'DESC',
                     ],
@@ -75,6 +129,11 @@ class CrudConfig
                 'list'        => [
                     'permission'     => 'ROLE_USER',
                     'orderBy'        => ['name'=>'DESC'],
+                    // You can use criterias in type list 
+                    'criterias'  => [
+                        'wheels' => 3,
+                        'colors' => 'blue',
+                     ],
                 ],
             ],
         ],
@@ -85,6 +144,8 @@ class CrudConfig
 ## Custom Manager
 
 By default all types uses the same [`DefaultEntityTypeManager`](src/Manager/DefaultEntityTypeManager.php) but you can redefine it.
+
+### Example
 
 ```yaml
 # config/services.yaml
@@ -99,14 +160,19 @@ namespace App\GraphQL\Manager;
 
 use Sparklink\GraphQLToolsBundle\Manager\DefaultEntityTypeManager;
 
-class DivisionManager extends DefaultEntityTypeManager
+class CarManager extends DefaultEntityTypeManager
 {
-    #TODO: see to remove config
-    public function list($config, $orderBy): array
+    public function list(array $criterias = [], array $orderBy = [], array $args = [], ResolveInfo $info = null): array
     {
-        return ['items' => $this->getRepository()->findBy(['parent' => null], $orderBy)];
+        return ['items' => $this->getRepository()->findBy($criterias, $orderBy)];
     }
 }
+```
+
+## Command Dump Manager
+This command dumps the manager used by type/entity.
+```bash
+$ bin/console graphql:dump-managers
 ```
 
 ## Scalars
@@ -151,8 +217,10 @@ final class FileItem extends ScalarFileItem
 ### Json
 
 ### Time
+Represent time without seconds. Example: "12:00"'
 
 ### Timefull
+Represents Time with seconds. Example: "12:12:30"
 
 ### Upload
 
