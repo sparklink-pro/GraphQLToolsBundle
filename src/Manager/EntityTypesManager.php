@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Sparklink\GraphQLToolsBundle\Manager;
 
+use Symfony\Contracts\Service\Attribute\SubscribedService;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Service\ServiceSubscriberTrait;
 use Traversable;
@@ -27,8 +28,9 @@ class EntityTypesManager implements ServiceSubscriberInterface
         return $manager;
     }
 
+    #[SubscribedService]
     private function defaultManager(): DefaultEntityTypeManager
     {
-        return $this->container->get(__METHOD__);
+        return $this->container->get(__CLASS__.'::'.__FUNCTION__);
     }
 }

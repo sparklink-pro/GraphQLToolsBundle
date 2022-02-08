@@ -81,7 +81,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function update($entity = null, $input, Configuration $configuration = null): object
+    public function update($input, $entity = null, Configuration $configuration = null): object
     {
         if (!$entity) {
             $entity = $this->getEntityInstance();
@@ -102,7 +102,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function create($input, Configuration $configuration = null): object
     {
-        return $this->update(null, $input, $configuration);
+        return $this->update($input, null, $configuration);
     }
 
     public function delete($entity): bool

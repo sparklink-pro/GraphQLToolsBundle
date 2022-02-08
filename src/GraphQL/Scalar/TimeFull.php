@@ -10,8 +10,8 @@ use GraphQL\Utils\Utils;
 use Overblog\GraphQLBundle\Annotation as GQL;
 
 #[GQL\Scalar]
-#[GQL\Description('Timefull scalar type')]
-class Timefull
+#[GQL\Description('Represents Time with seconds. Example: "12:12:30"')]
+class TimeFull
 {
     public const FORMAT_WITH_SECONDS = 'H:i:s';
 

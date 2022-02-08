@@ -10,7 +10,7 @@ use GraphQL\Utils\Utils;
 use Overblog\GraphQLBundle\Annotation as GQL;
 
 #[GQL\Scalar]
-#[GQL\Description('Time scalar type')]
+#[GQL\Description('Represent time without seconds. Example: "12:00"')]
 class Time
 {
     public const FORMAT = 'H:i';
