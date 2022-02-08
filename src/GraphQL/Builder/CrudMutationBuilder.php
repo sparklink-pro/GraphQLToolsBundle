@@ -54,7 +54,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                     ],
                     'description' => sprintf('Update or create an object of type %s', $type),
                     'type'        => $configType['mutationType'] ?? $type,
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({item: "%s", input: "%s"}, args))', $manager, $type, $idType, $inputType),
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({input: "%s", item: "%s"}, args))', $manager, $type, $inputType, $idType),
                 ] + $access + $public;
             }
 
