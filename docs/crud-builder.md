@@ -40,7 +40,6 @@ query Car($id: CarId!) {
 }
 ```
 
-
 ### List 
 
 Generate a query list for a given type. 
