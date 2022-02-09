@@ -2,12 +2,12 @@
 Manager
 ===========
 
-A Manager is an interface between the GraphQL Ttype and the repository.
+A Manager is an interface between GraphQL operations and the repository.
 It handle the CRUD operations using the repository.
 
- By default all types uses the same [`DefaultEntityTypeManager`](src/Manager/DefaultEntityTypeManager.php) but you can redefine it.
+By default all types uses the same [`DefaultEntityTypeManager`](src/Manager/DefaultEntityTypeManager.php) but you can redefine it.
 #### Example
-1. first, create a new class that extends `DefaultEntityTypeManager` and override the method:
+1. first, create a new class that extends `DefaultEntityTypeManager` and override the method you need.
 ```php
 // src/App/GraphQL/Manager/CarManager.php
 namespace App\GraphQL\Manager;

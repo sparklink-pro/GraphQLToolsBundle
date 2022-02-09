@@ -4,8 +4,6 @@ Scalars
 
 GraphlBunlde extensions and tools provides a set of scalars for GraphQL.
 
-
-
 Date
 ------
 Represent date without time.

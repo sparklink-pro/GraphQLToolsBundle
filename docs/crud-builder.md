@@ -5,7 +5,7 @@ The CrudBuilder helps you to create a GraphQL type and a GraphQL query and mutat
 
 ### EntityTypeId Builder
 
-Generate a graphQL scalar for a given type. Its name is the name of the type suffixed by `Id` (e.g. `CarId`). EntityTypeId is a graphql representation of an entity and is can be used in the GraphQL schema.  
+Generate a GraphQL scalar for a given type. Its name is the name of the type suffixed by `Id` (e.g. `CarId`). EntityTypeId is a graphql representation of an entity and is can be used in the GraphQL schema.  
 
 ### Query builder
 The query builder can generate, for each type, two queries: `Type` and `TypeList`.
@@ -36,7 +36,7 @@ You **can't disable** operation entityTypeId as we use it in all the operations.
 
 ### Get
 
-Generate a query for a given type, this query will expect an id as argument. 
+Generate a query for a given type, this query will expect an entityTypeId as argument. 
 **Default name:** '\<Type>' (e.g. : 'Car')
 ```gql
 query Car($id: CarId!) {
@@ -69,7 +69,7 @@ In `list` operation, you can add `orderBy` and `criterias` parameters.
 
 ### Create
 
-Generate a graphQL mutation that create a new entity.
+Generate a graphQL mutation that create a new entity, This Mutation will expect an typeInput as argument.
 **Default name:** '\<Type>Create' (e.g. : 'CarCreate').
 ```gql
 mutation CreateCar($input: CarInput!) {
@@ -82,7 +82,7 @@ mutation CreateCar($input: CarInput!) {
 
 ### Update
 
-Generate a graphQL mutation that update an entity. This mutation will expect an id as argument.
+Generate a graphQL mutation that update an entity. This mutation will expect an entityTypeId and typeInput as argument.
 **Default name:** '\<Type>Update' (e.g. : 'CarUpdate').
 ```gql
 mutation CarUpdate($item: CarId!, $input: CarInput!) {
@@ -95,7 +95,7 @@ mutation CarUpdate($item: CarId!, $input: CarInput!) {
 
 ### Delete
 
-Generate a graphQL mutation that delete an entity. This mutation will expect an id as argument.
+Generate a graphQL mutation that delete an entity. This mutation will expect an entityTypeId as argument.
 **Default name:** '\<Type>Delete' (e.g. : 'CarDelete').
 ```gql
 mutation CarDelete($item: CarId!) {
