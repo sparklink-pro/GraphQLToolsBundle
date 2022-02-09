@@ -10,3 +10,4 @@ If you want to know if you have a custom manager for a given type, you can use t
 ```bash
 $ bin/console graphql:dump-managers
 ```
+- 

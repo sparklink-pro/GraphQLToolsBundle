@@ -14,6 +14,11 @@ The query builder can generate, for each type, two queries: `Type` and `TypeList
 The query builder can generate a mutation for a given type `TypeUpdate` and `TypeDelete`.
 
 ## Operations
+All operations can be configured globally or per type.
+
+To define wich operations you want to be available in your GraphQL schema, you can use the `operations` options, it accepts an array of strings with the values `'get'`, `'list'`, `'create'`, `'update'`, `'delete'` and `'all'`(which means all operations). 
+You **can't disable** operation entityTypeId as we use it in all the operations. 
+
 
 \***Note:** By default, only the entityTypeId is generated.
 
@@ -23,12 +28,14 @@ The query builder can generate a mutation for a given type `TypeUpdate` and `Typ
 > ### *Commons parameters*
 > Each operation (`get`, `list`, `create`, `update`, `delete`) can have the following parameters:
 > - `access`: Act like access is true if not set, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-access-control.md)   
-> - `permission`: Shortcut for access, use expression '@=hasRole()'
+> - `permission`: Shortcut for `access`, use expression '@=hasRole()'
 > - `public`: Control if a operation needs to be removed from the results, see [here](https://github.com/overblog/GraphQLBundle/blob/master/docs/security/fields-public-control.md) 
-> - `name`: redefine the name of the operation, if in `default` config you must write explicitly '\<Type>' somewhere in the name (e.g. : "name" => "\<Type>List")
-
+> - `name`: redefine the name of the operation, if in `default` config you must write explicitly '\<Type>' somewhere in the name (e.g. : "name" => "\<Type>List").
+> 
+> **Note:** as `permission` is a shortcut for `access` you can't use the both in the same deep level.
 
 ### Get
+
 Generate a query for a given type, this query will expect an id as argument. 
 **Default name:** '\<Type>' (e.g. : 'Car')
 ```gql
@@ -61,6 +68,7 @@ In `list` operation, you can add `orderBy` and `criterias` parameters.
 
 
 ### Create
+
 Generate a graphQL mutation that create a new entity.
 **Default name:** '\<Type>Create' (e.g. : 'CarCreate').
 ```gql
@@ -73,19 +81,20 @@ mutation CreateCar($input: CarInput!) {
 ```
 
 ### Update
+
 Generate a graphQL mutation that update an entity. This mutation will expect an id as argument.
 **Default name:** '\<Type>Update' (e.g. : 'CarUpdate').
 ```gql
 mutation CarUpdate($item: CarId!, $input: CarInput!) {
     res: CarUpdate(item:$item ,input: $input) {
         id
-    name
     }
 }
 ```
 
 
 ### Delete
+
 Generate a graphQL mutation that delete an entity. This mutation will expect an id as argument.
 **Default name:** '\<Type>Delete' (e.g. : 'CarDelete').
 ```gql

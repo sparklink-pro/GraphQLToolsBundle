@@ -9,6 +9,6 @@ Documentation
 - [Installation](docs/installation.md)
 - [Crud Builder](docs/crud-builder.md)
 - [Manager](docs/manager.md)
-- [Utils](docs/utils.md)
 - [Scalars](docs/scalars.md)
+- [Utils](docs/utils.md)
 
