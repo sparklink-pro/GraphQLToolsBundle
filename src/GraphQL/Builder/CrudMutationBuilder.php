@@ -21,9 +21,6 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
 
         $configTypes = $configuration['types'];
         foreach ($configTypes as $type => $configType) {
-            // Implement in the future
-            $idType     = $configType['idType'] ?? 'Int';
-
             $nameCreate = $this->getNameOperation($configuration, $type, self::OPERATION_CREATE);
             $nameUpdate = $this->getNameOperation($configuration, $type, self::OPERATION_UPDATE);
             $nameDelete = $this->getNameOperation($configuration, $type, self::OPERATION_DELETE);
@@ -34,13 +31,18 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
             if ($this->isOperationActive($configuration, $type, self::OPERATION_CREATE)) {
                 $access                 = $this->getAccess($configuration, $type, self::OPERATION_CREATE);
                 $public                 = $this->getPublic($configuration, $type, self::OPERATION_CREATE);
+                $parent                 = $configType[self::OPERATION_CREATE]['parent'] ?? null;
+
+                $args = ['input' => ['type' => $inputType]];
+                if ($parent) {
+                    $args['parent'] = ['type' => $parent['type'].'!'];
+                }
+
                 $properties[$nameCreate]= [
-                    'args' => [
-                        'input' => ['type' => $inputType],
-                    ],
+                    'args'        => $args,
                     'description' => sprintf('Create a %s', $type),
                     'type'        => $configType['mutationType'] ?? $type,
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").create, arguments({ input: "%s"}, args))', $manager, $type, $inputType),
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").create, arguments({ input: "%s"}, args) + {1: %s, 2: "%s"})', $manager, $type, $inputType, $parent ? "args['parent']" : 'null', $parent ? $parent['method'] : ''),
                 ] + $access + $public;
             }
 
@@ -54,7 +56,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                     ],
                     'description' => sprintf('Update or create an object of type %s', $type),
                     'type'        => $configType['mutationType'] ?? $type,
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({input: "%s", item: "%s"}, args))', $manager, $type, $inputType, $idType),
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").update, arguments({input: "%s", item: "%s"}, args))', $manager, $type, $inputType, $this->getEntityIdType($type)),
                 ] + $access + $public;
             }
 
@@ -67,7 +69,7 @@ class CrudMutationBuilder extends CrudBuilder implements MappingInterface
                     ],
                     'description' => sprintf('Remove a object of type %s', $type),
                     'type'        => $configType['mutationType'] ?? 'Boolean',
-                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $idType),
+                    'resolve'     => sprintf('@=call(service("%s").getManager("%s").delete, arguments({item: "%s"}, args))', $manager, $type, $this->getEntityIdType($type)),
                 ] + $access + $public;
             }
         }

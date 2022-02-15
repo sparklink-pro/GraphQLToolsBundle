@@ -130,10 +130,10 @@ class CrudBuilderConfiguration implements ConfigurationInterface
         $rootNode    = $treeBuilder->getRootNode();
 
         $rootNode
-        ->children()
-            ->arrayNode('orderBy')->ignoreExtraKeys(false)->end()
-            ->arrayNode('criterias')->ignoreExtraKeys(false)->end()
-        ->end();
+            ->children()
+                ->arrayNode('orderBy')->ignoreExtraKeys(false)->end()
+                ->arrayNode('criterias')->ignoreExtraKeys(false)->end()
+            ->end();
 
         $rootNode = $this->addAccessConfig($rootNode);
 
@@ -144,6 +144,16 @@ class CrudBuilderConfiguration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder(self::CREATE);
         $rootNode    = $treeBuilder->getRootNode();
+
+        $rootNode
+            ->children()
+                ->arrayNode('parent')
+                    ->children()
+                        ->scalarNode('type')->isRequired(true)->end()
+                        ->scalarNode('method')->isRequired(true)->end()
+                    ->end()
+                ->end()
+            ->end();
 
         $rootNode = $this->addAccessConfig($rootNode);
 

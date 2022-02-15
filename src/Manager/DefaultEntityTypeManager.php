@@ -81,7 +81,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function update($input, $entity = null, Configuration $configuration = null): object
+    protected function getInstance($input, $entity = null, Configuration $configuration = null)
     {
         if (!$entity) {
             $entity = $this->getEntityInstance();
@@ -95,14 +95,27 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
             throw new InvalidArgumentsError([new InvalidArgumentError('errors', $errors)]);
         }
 
+        return $entity;
+    }
+
+    public function update($input, $entity = null, Configuration $configuration = null): object
+    {
+        $entity = $this->getInstance($input, $entity, $configuration);
         $this->getEntityManager()->flush();
 
         return $entity;
     }
 
-    public function create($input, Configuration $configuration = null): object
+    public function create($input, $parent = null, string $method = null, Configuration $configuration = null): object
     {
-        return $this->update($input, null, $configuration);
+        dump(\func_get_args());
+        $entity = $this->getInstance($input, null, $configuration);
+        if ($parent) {
+            $parent->$method($entity);
+        }
+        $this->getEntityManager()->flush();
+
+        return $entity;
     }
 
     public function delete($entity): bool
