@@ -108,7 +108,6 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function create($input, $parent = null, string $method = null, Configuration $configuration = null): object
     {
-        dump(\func_get_args());
         $entity = $this->getInstance($input, null, $configuration);
         if ($parent) {
             $parent->$method($entity);
