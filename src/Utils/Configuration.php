@@ -35,7 +35,9 @@ class Configuration
     public function ignore(...$paths): self
     {
         foreach ($paths as $path) {
-            $this->ignoredPaths[] = $path;
+            if (!in_array($path, $this->ignoredPaths)) {
+                $this->ignoredPaths[] = $path;
+            }
         }
 
         return $this;
