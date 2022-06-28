@@ -22,7 +22,13 @@ class EntityTypesManager implements ServiceSubscriberInterface
 
     public function getManager(string $type): EntityTypeManagerInterface
     {
-        $manager = $this->managers[$type] ?? $this->defaultManager();
+        /* Use specific manager if exists */
+        if (isset($this->managers[$type])) {
+            return $this->managers[$type];
+        }
+
+        /* Use default manager non shared service */
+        $manager = $this->defaultManager();
         $manager->setType($type);
 
         return $manager;

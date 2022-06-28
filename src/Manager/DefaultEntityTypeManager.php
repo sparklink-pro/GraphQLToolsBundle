@@ -46,7 +46,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function setType(string $type): void
     {
-        $this->type        = $type;
+        $this->type = $type;
         $this->entityClass = $this->resolver->getEntity($type);
     }
 
@@ -110,7 +110,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
     {
         $entity = $this->getInstance($input, null, $configuration);
         if ($parent) {
-            $parent->$method($entity);
+            $parent->{$method}($entity);
         }
         $this->getEntityManager()->flush();
 
