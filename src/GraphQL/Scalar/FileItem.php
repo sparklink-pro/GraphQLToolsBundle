@@ -7,15 +7,18 @@ namespace Sparklink\GraphQLToolsBundle\GraphQL\Scalar;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use GraphQL\Error\InvariantViolation;
+use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
 use Symfony\Component\HttpFoundation\File\File;
 
 abstract class FileItem extends Upload
 {
     protected EntityRepository $repository;
+    protected bool $allowOverride = false;
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, bool $allowOverride = false)
     {
         $this->repository = $registry->getRepository($this->getFileEntityClass());
+        $this->allowOverride = $allowOverride;
     }
 
     abstract protected function getFileEntityClass(): string;
@@ -27,6 +30,9 @@ abstract class FileItem extends Upload
     {
         if ($value instanceof File) {
             return $this->createEntityFromFile($value);
+        }
+        if (null === $value) {
+            return null;
         }
 
         return $this->getEntityFromValue($value);
@@ -51,10 +57,15 @@ abstract class FileItem extends Upload
      */
     protected function getEntityFromValue($value): ?object
     {
-        if (\is_array($value) && (isset($value['id']) || isset($value['uid']))) {
-            $entityId = $value['id'] ?? $value['uid'];
+        // We are allow to override the file with another one
+        if ($this->allowOverride) {
+            if (\is_array($value) && (isset($value['id']) || isset($value['uid']))) {
+                $entityId = $value['id'] ?? $value['uid'];
 
-            return $this->repository->find($entityId);
+                return $this->repository->find($entityId);
+            }
+        } else {
+            return new IgnoredValue();
         }
         throw new InvariantViolation('File Item must be a file array or uploaded file item must be a string');
     }

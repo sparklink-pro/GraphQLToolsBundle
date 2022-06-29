@@ -6,6 +6,7 @@ namespace Sparklink\GraphQLToolsBundle\Utils;
 
 use Sparklink\GraphQLToolsBundle\Entity\Interface\RankableEntityInterface;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
+use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 
@@ -30,7 +31,7 @@ class Populator
             $path = implode('.', $currentPath);
 
             // Ignored property
-            if (\in_array($path, $ignoredPath)) {
+            if (\in_array($path, $ignoredPath) || $value instanceof IgnoredValue) {
                 continue;
             }
 
