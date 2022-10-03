@@ -46,7 +46,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function setType(string $type): void
     {
-        $this->type = $type;
+        $this->type        = $type;
         $this->entityClass = $this->resolver->getEntity($type);
     }
 
@@ -85,7 +85,6 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
     {
         if (!$entity) {
             $entity = $this->getEntityInstance();
-            $this->getEntityManager()->persist($entity);
         }
 
         $this->populator->populateInput($entity, $input, $configuration);
@@ -101,6 +100,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
     public function update($input, $entity = null, Configuration $configuration = null): object
     {
         $entity = $this->getInstance($input, $entity, $configuration);
+        $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
 
         return $entity;
@@ -112,6 +112,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         if ($parent) {
             $parent->{$method}($entity);
         }
+        $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
 
         return $entity;
