@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Sparklink\GraphQLToolsBundle\Utils;
+namespace Sparklink\GraphQLToolsBundle\Populator;
 
 class Configuration
 {
-    protected array $paths = [];
+    protected array $paths        = [];
     protected array $ignoredPaths = [];
-    protected $currentPath = null;
+    protected $currentPath        = null;
 
     public function at(string $path): self
     {
         $this->paths[$path] = [];
-        $this->currentPath = $path;
+        $this->currentPath  = $path;
 
         return $this;
     }
@@ -35,7 +35,7 @@ class Configuration
     public function ignore(...$paths): self
     {
         foreach ($paths as $path) {
-            if (!in_array($path, $this->ignoredPaths)) {
+            if (!\in_array($path, $this->ignoredPaths)) {
                 $this->ignoredPaths[] = $path;
             }
         }

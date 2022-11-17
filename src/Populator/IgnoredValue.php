@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sparklink\GraphQLToolsBundle\Utils\Populator;
+namespace Sparklink\GraphQLToolsBundle\Populator;
 
 final class IgnoredValue
 {

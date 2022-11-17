@@ -7,7 +7,7 @@ namespace Sparklink\GraphQLToolsBundle\GraphQL\Scalar;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use GraphQL\Error\InvariantViolation;
-use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
+use Sparklink\GraphQLToolsBundle\Populator\IgnoredValue;
 use Symfony\Component\HttpFoundation\File\File;
 
 abstract class FileItem extends Upload
@@ -17,7 +17,7 @@ abstract class FileItem extends Upload
 
     public function __construct(ManagerRegistry $registry, bool $allowOverride = false)
     {
-        $this->repository = $registry->getRepository($this->getFileEntityClass());
+        $this->repository    = $registry->getRepository($this->getFileEntityClass());
         $this->allowOverride = $allowOverride;
     }
 

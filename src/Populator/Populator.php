@@ -2,19 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Sparklink\GraphQLToolsBundle\Utils;
+namespace Sparklink\GraphQLToolsBundle\Populator;
 
 use Sparklink\GraphQLToolsBundle\Entity\Interface\RankableEntityInterface;
+use Sparklink\GraphQLToolsBundle\Manager\PopulatorExtensionInterface;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
-use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 
 class Populator
 {
-    public function __construct(protected TypeEntityResolver $entityResolver, protected PropertyInfoExtractorInterface $propertyInfoExtractor)
+    protected array $extensions = [];
+
+    public function __construct(protected TypeEntityResolver $entityResolver, protected PropertyInfoExtractorInterface $propertyInfoExtractor, array $extensions = [])
     {
-        $this->accessor = PropertyAccess::createPropertyAccessor();
+        $this->accessor   = PropertyAccess::createPropertyAccessor();
+
+        foreach ($extensions as $extension) {
+            if (!$extension instanceof PopulatorExtensionInterface) {
+                throw new \InvalidArgumentException(sprintf('Populator Extension %s is invalid. It musts implement %s', \get_class($extension), PopulatorExtensionInterface::class));
+            }
+            $this->extensions[] = $extension;
+        }
     }
 
     public function populateInput($entity, $input, Configuration $configuration = null, array $paths = []): void
@@ -24,15 +33,22 @@ class Populator
         }
 
         $inputProperties = get_object_vars($input);
-        $ignoredPath = $configuration->getIgnoredPaths();
+        $ignoredPath     = $configuration->getIgnoredPaths();
 
         foreach ($inputProperties as $inputProperty => $value) {
             $currentPath = [...$paths, $inputProperty];
-            $path = implode('.', $currentPath);
+            $path        = implode('.', $currentPath);
 
             // Ignored property
             if (\in_array($path, $ignoredPath) || $value instanceof IgnoredValue) {
                 continue;
+            }
+
+            foreach ($this->extensions as $extension) {
+                if ($extension->supports($value)) {
+                    $extension->populate($entity, $inputProperty, $value);
+                    continue 2;
+                }
             }
 
             if ($this->isInputObjectOrArray($value)) {
@@ -82,7 +98,7 @@ class Populator
             throw new \Exception("Unable to determine property {$property} info on entity class ".\get_class($entity));
         }
         $isCollection = $propertyInfo->isCollection();
-        $class = $propertyInfo->getClassName();
+        $class        = $propertyInfo->getClassName();
 
         if ($isCollection) {
             $class = $propertyInfo->getCollectionValueTypes()[0]?->getClassName();
@@ -95,7 +111,7 @@ class Populator
 
             $collection = [];
             foreach ($inputValue as $index => $inputValueEntry) {
-                $entryId = $this->accessor->getValue($inputValueEntry, 'id');
+                $entryId    = $this->accessor->getValue($inputValueEntry, 'id');
                 $entryValue = null;
 
                 if ($entryId) {

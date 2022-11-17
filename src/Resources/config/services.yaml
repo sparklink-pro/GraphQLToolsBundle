@@ -26,7 +26,13 @@ services:
     alias: Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager
     public: true
 
-  Sparklink\GraphQLToolsBundle\Utils\Populator: ~
+  Sparklink\GraphQLToolsBundle\Populator\Populator:
+    public: true
+    arguments:
+      - "@Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver"
+      - "@Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface"
+      - !tagger_iterator { tag: "sparklink.populator.extension" }
+
   Sparklink\GraphQLToolsBundle\Manager\DefaultEntityTypeManager:
     shared: false
 

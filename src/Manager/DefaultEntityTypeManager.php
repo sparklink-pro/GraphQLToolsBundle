@@ -10,9 +10,9 @@ use Overblog\GraphQLBundle\Error\InvalidArgumentError;
 use Overblog\GraphQLBundle\Error\InvalidArgumentsError;
 use Overblog\GraphQLBundle\Error\UserError;
 use Sparklink\GraphQLToolsBundle\Doctrine\LinkedEntityFinder;
+use Sparklink\GraphQLToolsBundle\Populator\Configuration;
+use Sparklink\GraphQLToolsBundle\Populator\Populator;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
-use Sparklink\GraphQLToolsBundle\Utils\Configuration;
-use Sparklink\GraphQLToolsBundle\Utils\Populator;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class DefaultEntityTypeManager implements EntityTypeManagerInterface
