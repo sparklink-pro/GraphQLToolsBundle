@@ -60,6 +60,29 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $this->getEntityManager()->getRepository($this->entityClass);
     }
 
+    protected function listPaginated(array $criterias = [], array $orderBy = [], array $args = [], ResolveInfo $info = null): array
+    {
+        $pageSize = $args['input']['pageSize'] ?? 10;
+        $page     = $args['input']['page'] ?? 1;
+
+        $queryBuilder = $this->getRepository()->createQueryBuilder('e');
+
+        $queryBuilder->setMaxResults($pageSize);
+        $queryBuilder->setFirstResult(($page - 1) * $pageSize);
+
+        foreach ($criterias as $criteria) {
+            $queryBuilder->andWhere($criteria);
+        }
+
+        foreach ($orderBy as $order) {
+            $queryBuilder->addOrderBy($order);
+        }
+
+        $query = $queryBuilder->getQuery();
+
+        return ['items' => $query->getResult(), 'maxResults' => $query->getMaxResults()];
+    }
+
     /**
      * @param $criterias array       List of criterias to filter the result set by the crud query builder from configuration
      * @param $orders    array       List of orderBy to sort the result set by the crud query builder from configuration
@@ -68,6 +91,10 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
      */
     public function list(array $criterias = [], array $orderBy = [], array $args = [], ResolveInfo $info = null): array
     {
+        if (isset($args['input'])) {
+            return $this->listPaginated($criterias, $orderBy, $args, $info);
+        }
+
         return ['items' => $this->getRepository()->findBy($criterias, $orderBy)];
     }
 

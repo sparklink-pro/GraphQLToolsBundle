@@ -8,8 +8,9 @@ use Overblog\GraphQLBundle\Definition\Builder\MappingInterface;
 
 class CrudQueryBuilder extends CrudBuilder implements MappingInterface
 {
-    public const OPERATION_GET  = 'get';
-    public const OPERATION_LIST = 'list';
+    public const OPERATION_GET       = 'get';
+    public const OPERATION_LIST      = 'list';
+    public const OPERATION_PAGINATED = 'paginated';
 
     public function toMappingDefinition(array $builderConfig): array
     {
@@ -46,6 +47,7 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                 $public                   = $this->getPublic($configuration, $type, self::OPERATION_LIST);
                 $criterias                = $configType['list']['criterias'] ?? $configuration['default']['list']['criterias'] ?? [];
                 $orders                   = $configType['list']['orderBy'] ?? $configuration['default']['list']['orderBy'] ?? [];
+                $paginated                = $configType['list']['paginated'] ?? $configuration['default']['list']['paginated'] ?? false;
 
                 $properties[$nameFindAll] = [
                     'description' => sprintf('Find all objects of type %s ', $type),
@@ -62,10 +64,46 @@ class CrudQueryBuilder extends CrudBuilder implements MappingInterface
                     'type'   => 'object',
                     'config' => [
                         'fields' => [
-                            'items' => sprintf('[%s!]!', $type),
+                            'items'                    => sprintf('[%s!]!', $type),
                         ],
                     ],
                 ];
+
+                if ($paginated) {
+                    $nameFindAllPaginated              = sprintf('%sPaginated', $nameFindAll);
+                    $payloadPaginated                  =  sprintf('%sPayload', $nameFindAllPaginated);
+
+                    $types[$payloadPaginated] = [
+                        'type'   => 'object',
+                        'config' => [
+                            'fields' => [
+                                'items'                    => sprintf('[%s!]!', $type),
+                            ],
+                        ],
+                    ];
+
+                    $properties[$nameFindAllPaginated] = [
+                        'description' => sprintf('Find all objects of type %s and return a paginated result', $type),
+                        'type'        => $payloadPaginated,
+                        'resolve'     => sprintf('@=call(service("%s").getManager("%s").list, %s)', $manager, $type, sprintf('[%s, %s, args.getArrayCopy(), info]', json_encode($criterias), json_encode($orders))),
+                        'args'        => [
+                            'input' => ['type' => 'PaginatedInput!'],
+                        ],
+                    ] + $access + $public;
+
+                    $types['PaginatedInput']                               = [
+                        'type'   => 'input-object',
+                        'config' => [
+                            'fields' => [
+                                'pageSize' => ['type' => 'Int!'],
+                                'current'  => ['type' => 'Int'],
+                                'order'    => ['type' => 'OrderListOrder', 'defaultValue' => 'ASC'],
+                                'filters'  => ['type' => sprintf('%sFilterInput!', $type)],
+                                'search'   => ['type' => 'String'],
+                            ],
+                        ],
+                    ];
+                }
             }
         }
 

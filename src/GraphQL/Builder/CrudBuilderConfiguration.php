@@ -131,6 +131,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->booleanNode('paginated')->defaultFalse()->end()
                 ->arrayNode('orderBy')->ignoreExtraKeys(false)->end()
                 ->arrayNode('criterias')->ignoreExtraKeys(false)->end()
             ->end();
