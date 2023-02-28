@@ -8,10 +8,13 @@ use Sparklink\GraphQLToolsBundle\Entity\Interface\RankableEntityInterface;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
 use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 
 class Populator
 {
+    protected PropertyAccessor $accessor;
+    
     public function __construct(protected TypeEntityResolver $entityResolver, protected PropertyInfoExtractorInterface $propertyInfoExtractor)
     {
         $this->accessor = PropertyAccess::createPropertyAccessor();
