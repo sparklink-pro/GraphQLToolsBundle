@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DumpTypeEntityManagersCommand extends Command
 {
-    protected static $defaultName = 'graphql:dump-managers';
+    protected static $defaultName        = 'graphql:dump-managers';
     protected static $defaultDescription = 'Dump type entity managers';
     protected TypeEntityResolver $resolver;
     private EntityTypesManager $typesManager;
@@ -21,14 +21,13 @@ class DumpTypeEntityManagersCommand extends Command
     public function __construct(TypeEntityResolver $resolver, EntityTypesManager $typesManager)
     {
         parent::__construct();
-        $this->resolver = $resolver;
+        $this->resolver     = $resolver;
         $this->typesManager = $typesManager;
     }
 
     protected function configure(): void
     {
         $this
-            ->setDescription(self::$defaultDescription)
             ->setHelp(
                 <<<'EOF'
 <info>%command.name%</info> dumps all queries and mutations
@@ -41,11 +40,11 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $table = new Table($output);
-        $rows = [];
+        $rows  = [];
         foreach ($this->resolver->getMapping() as $type => $mapping) {
-            $class = $mapping['class'];
+            $class   = $mapping['class'];
             $manager = $this->typesManager->getManager($type);
-            $rows[] = [$type, $class, \get_class($manager)];
+            $rows[]  = [$type, $class, \get_class($manager)];
         }
 
         $table
