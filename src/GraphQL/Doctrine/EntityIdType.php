@@ -27,7 +27,6 @@ final class EntityIdType extends ScalarType
     public function __construct(ManagerRegistry $registry, string $className = null)
     {
         parent::__construct([]);
-        $this->registry = $registry;
         $this->className = $className;
         $this->manager = $registry->getManagerForClass($className);
         $this->metadata = $this->manager->getClassMetadata($this->className);
