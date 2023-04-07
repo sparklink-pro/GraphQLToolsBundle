@@ -129,6 +129,10 @@ abstract class CrudBuilder implements MappingInterface
     private function configureAccess($config)
     {
         if (null !== $config['access']) {
+            if ('@=' !== substr($config['access'], 0, 2)) {
+                $config['access'] = '@='.$config['access'];
+            }
+            
             return ['access' => $config['access']];
         }
 
