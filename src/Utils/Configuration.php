@@ -6,14 +6,14 @@ namespace Sparklink\GraphQLToolsBundle\Utils;
 
 class Configuration
 {
-    protected array $paths = [];
+    protected array $paths        = [];
     protected array $ignoredPaths = [];
-    protected $currentPath = null;
+    protected $currentPath;
 
     public function at(string $path): self
     {
         $this->paths[$path] = [];
-        $this->currentPath = $path;
+        $this->currentPath  = $path;
 
         return $this;
     }
@@ -35,12 +35,17 @@ class Configuration
     public function ignore(...$paths): self
     {
         foreach ($paths as $path) {
-            if (!in_array($path, $this->ignoredPaths)) {
+            if (!\in_array($path, $this->ignoredPaths)) {
                 $this->ignoredPaths[] = $path;
             }
         }
 
         return $this;
+    }
+
+    public function isIgnored(string $path): bool
+    {
+        return \in_array($path, $this->ignoredPaths);
     }
 
     public function ignoreNull(): self
