@@ -95,11 +95,15 @@ class Populator
             }
             $pathId     = implode('.', [...$paths, 'id']);
             $collection = [];
+
+            // If id is ignored, we enforce the creation of a new entity
+            $disableUpdate = $configuration->isIgnored($pathId);
+
             foreach ($inputValue as $index => $inputValueEntry) {
                 $entryId    = $this->accessor->getValue($inputValueEntry, 'id');
                 $entryValue = null;
 
-                if (!$configuration->isIgnored($pathId) && $entryId) {
+                if (!$disableUpdate && $entryId) {
                     if (!$currentValue) {
                         throw new \Exception('Unable to find related entity');
                     }
@@ -117,11 +121,12 @@ class Populator
                     $entryValue = new $class();
                 }
                 // Ignore id
-                $configuration->ignore($pathId);
+                $childConfiguration = clone $configuration;
+                $childConfiguration->ignore($pathId);
                 if ($entryValue instanceof RankableEntityInterface) {
                     $entryValue->setRank($index + 1);
                 }
-                $this->populateInput($entryValue, $inputValueEntry, $configuration, $paths);
+                $this->populateInput($entryValue, $inputValueEntry, $childConfiguration, $paths);
                 $collection[] = $entryValue;
             }
             $this->accessor->setValue($entity, $property, $collection);
