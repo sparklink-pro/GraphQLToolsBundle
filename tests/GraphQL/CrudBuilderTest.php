@@ -58,21 +58,21 @@ class CrudBuilderTest extends TestCase
         $this->assertArrayHasKey('TEST2Update', $this->getToMappingDefinition($this->mutationBuilder, $config));
         $this->assertArrayHasKey('TEST2Delete', $this->getToMappingDefinition($this->mutationBuilder, $config));
 
-        //check TEST 3
+        // check TEST 3
         $this->assertArrayHasKey('TEST3List', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']);
         $this->assertArrayHasKey('TEST3', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']);
         $this->assertArrayNotHasKey('CreateTEST3', $this->getToMappingDefinition($this->mutationBuilder, $config));
         $this->assertArrayNotHasKey('TEST3Update', $this->getToMappingDefinition($this->mutationBuilder, $config));
         $this->assertArrayNotHasKey('TEST3Delete', $this->getToMappingDefinition($this->mutationBuilder, $config));
 
-        //check TEST 4
+        // check TEST 4
         $this->assertArrayNotHasKey('TEST4List', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']); // check if the name is correctly replaced
         $this->assertArrayHasKey('ListTEST4', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']); // same
         $this->assertArrayNotHasKey('TEST4', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']);
         $this->assertArrayHasKey('TEST4Update', $this->getToMappingDefinition($this->mutationBuilder, $config));
         $this->assertArrayNotHasKey('CreateTEST4', $this->getToMappingDefinition($this->mutationBuilder, $config));
 
-        //check TEST 5
+        // check TEST 5
         $this->assertArrayNotHasKey('TEST5', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']);
         $this->assertArrayNotHasKey('TEST5List', $this->getToMappingDefinition($this->queryBuilder, $config)['fields']);
         $this->assertArrayNotHasKey('TEST5Update', $this->getToMappingDefinition($this->mutationBuilder, $config));
@@ -80,7 +80,7 @@ class CrudBuilderTest extends TestCase
         $this->assertArrayNotHasKey('CreateTEST5', $this->getToMappingDefinition($this->mutationBuilder, $config));
         $this->assertArrayHasKey('TEST5Id', $this->getToMappingDefinition($this->entityIdBuilder, $config)['types']);
 
-        //check TEST 6
+        // check TEST 6
         $this->assertArrayNotHasKey('TEST6Id', $this->getToMappingDefinition($this->entityIdBuilder, $config)['types']);
     }
 
