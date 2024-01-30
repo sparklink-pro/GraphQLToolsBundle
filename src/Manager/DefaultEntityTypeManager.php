@@ -102,6 +102,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         $entity = $this->getInstance($input, $entity, $configuration);
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
+        $this->getEntityManager()->refresh($entity);
 
         return $entity;
     }
@@ -114,7 +115,8 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         }
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
-
+        $this->getEntityManager()->refresh($entity);
+        
         return $entity;
     }
 
