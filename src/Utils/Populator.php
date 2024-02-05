@@ -26,7 +26,7 @@ class Populator
             $configuration = new Configuration();
         }
 
-        $inputProperties = get_object_vars($input);
+        $inputProperties = is_array($input) ? $input : get_object_vars($input);
         $ignoredPath     = $configuration->getIgnoredPaths();
 
         foreach ($inputProperties as $inputProperty => $value) {
