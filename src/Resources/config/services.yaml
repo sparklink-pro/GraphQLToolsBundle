@@ -21,6 +21,7 @@ services:
     public: true
     arguments:
       - !tagged_iterator { tag: "sparklink.type_manager", index_by: "type" }
+      - "%graphql_tools_bundle_use_v2%"
 
   sparklink.types_manager:
     alias: Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager
@@ -30,12 +31,10 @@ services:
   Sparklink\GraphQLToolsBundle\Manager\DefaultEntityTypeManager:
     shared: false
 
+  Sparklink\GraphQLToolsBundle\Manager\EntityTypeManager:
+    shared: false
+
   Sparklink\GraphQLToolsBundle\Doctrine\LinkedEntityFinder: ~
 
   Sparklink\GraphQLToolsBundle\GraphQL\Resolver\LinkedTypesResolver:
     public: true
-
-  Sparklink\GraphQLToolsBundle\GraphQL\Resolver\DefaultInterfaceResolver:
-    arguments: ["@overblog_graphql.type_resolver"]
-    tags:
-      - { name: overblog_graphql.resolver, alias: "default_interface_resolver", method: "resolveType" }

@@ -27,6 +27,16 @@ class CrudBuilderTest extends TestCase
                     'name' => 'Create<Type>',
                 ],
             ],
+            'operations' => [
+                'undelete' => [
+                    'name' => 'Undelete<Type>',
+                    'type' => 'mutation',
+                    'return' => '<Type>!',
+                    'args' => [
+                        'item' => ['type' => '<Type>Id!'],
+                    ],
+                ],
+            ],
             'types'=> [
                 'TEST'   => ['operations' => 'all'],
                 'TEST2'  => [

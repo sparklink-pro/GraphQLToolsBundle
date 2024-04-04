@@ -1,0 +1,33 @@
+defaults:
+  permission: ROLE_ADMIN
+
+operations:
+  undelete:
+    class: Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\UndeleteOperation
+    options:
+      option1: titi
+      option2: [v1, v2]
+  get:
+    permission: ~
+    access: nono
+  delete:
+    permission: ROLE_DELETE
+
+types:
+  Car:
+    permission: ROLE_FOO
+    access: ~
+    operations: get
+
+  User:
+    operations:
+      get:
+        permission: ROLE_BAR
+        access: ~
+      update:
+
+  Post:
+    operations: [get, list]
+
+  Comment:
+    operations: all
