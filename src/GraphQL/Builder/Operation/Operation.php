@@ -24,49 +24,42 @@ abstract class Operation implements OperationInterface
                 $this,
                 [$options]
             );
-        }catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw new \Exception(sprintf('Error processing configuration for type "%s", operation: "%s":  %s', $this->type, static::class, $e->getMessage()));
         }
     }
 
     /**
-     * Return the operation type: Query or Mutation
-     *
-     * @return OperationType
+     * Return the operation type: Query or Mutation.
      */
     abstract public function getOperationType(): OperationType;
 
     /**
-     * Return the type of the operation
-     *
-     * @return string
+     * Return the type of the operation.
      */
     abstract protected function getType(): string;
 
     /**
      * Return the input type name related to the type
-     * Ex: User -> UserInput
-     * @return string
+     * Ex: User -> UserInput.
      */
     protected function getInputType(): string
     {
-        return sprintf("%sInput", $this->type);
+        return sprintf('%sInput', $this->type);
     }
 
     /**
      * Return the scalar id type related to the type
-     * Ex: User -> UserId
-     * @return string
+     * Ex: User -> UserId.
      */
     protected function getScalarIdType(): string
     {
-        return sprintf("%sId", $this->type);
+        return sprintf('%sId', $this->type);
     }
 
     /**
      * Get the argument name representing a type instance
-     * Ex: User -> user
-     * @return string
+     * Ex: User -> user.
      */
     protected function getArgType(): string
     {
@@ -80,24 +73,22 @@ abstract class Operation implements OperationInterface
 
     protected function getInferName(): string
     {
-        $parts = explode("\\", static::class);
+        $parts = explode('\\', static::class);
         $className = array_pop($parts);
 
-        return preg_replace("/Operation$/", "", $className);
+        return preg_replace('/Operation$/', '', $className);
     }
 
     /**
-     * Get the name of the operation
+     * Get the name of the operation.
      */
     protected function getName(): string
     {
-        return sprintf("%s%s", $this->getInferName(), ucfirst($this->type));
+        return sprintf('%s%s', $this->type, $this->getInferName());
     }
 
     /**
-     * Return the corresponding method on the provider
-     *
-     * @return string
+     * Return the corresponding method on the provider.
      */
     protected function getProviderMethod(): string
     {
@@ -105,17 +96,15 @@ abstract class Operation implements OperationInterface
     }
 
     /**
-     * Get the description of the operation
+     * Get the description of the operation.
      */
     protected function getDescription(): string
     {
-        return "";
+        return '';
     }
 
     /**
-     * Get the args used by the operation
-     *
-     * @return array
+     * Get the args used by the operation.
      */
     protected function getArgs(): array
     {
@@ -123,8 +112,7 @@ abstract class Operation implements OperationInterface
     }
 
     /**
-     * Additional types to be added to the schema
-     * @return array 
+     * Additional types to be added to the schema.
      */
     protected function getAdditionalTypes(): array
     {
@@ -143,35 +131,45 @@ abstract class Operation implements OperationInterface
         $map = [];
         $mainArgs = [];
 
-        foreach($arguments as $name => $type) {
-            $type = is_string($type) ? $type : $type['type'];
+        foreach ($arguments as $name => $type) {
+            $type = \is_string($type) ? $type : $type['type'];
             $mainArgs[] = sprintf('args["%s"]', $name);
             $map[$name] = $type;
         }
 
         $defaultArgs = [];
+        if ($wrapped) {
+            foreach ($map as $_) {
+                $defaultArgs[] = '""';
+            }
+        }
         $defaultArgs[] = 'args.getArrayCopy()';
-        $defaultArgs[] = json_encode($this->options);
+        $defaultArgs[] = json_encode($this->options ?? []);
         $defaultArgs[] = 'info';
 
         if (!$wrapped) {
-            return sprintf('[%s]', implode(", ", $mainArgs + $defaultArgs));
+            return sprintf('[%s]', implode(', ', [...$mainArgs, ...$defaultArgs]));
         }
 
-        return sprintf('arguments(%s, args) + [%s]', json_encode($map), implode(", ", $defaultArgs));        
+        return sprintf('arguments(%s, args) + [%s]', json_encode($map), implode(', ', $defaultArgs));
     }
 
     public function getMapping(): array
     {
-        return [
-            'fields' => [
+        $fields = [];
+        if (OperationType::NONE !== $this->getOperationType()) {
+            $fields = [
                 $this->getName() => [
-                    'type'          => $this->getType(),
-                    'description'   => $this->getDescription(),
-                    'args'          => $this->getArgs(),
-                    'resolve'       => $this->getResolver()
+                    'type' => $this->getType(),
+                    'description' => $this->getDescription(),
+                    'args' => $this->getArgs(),
+                    'resolve' => $this->getResolver(),
                 ],
-            ],
+            ];
+        }
+
+        return [
+            'fields' => $fields,
             'types' => $this->getAdditionalTypes(),
         ];
     }

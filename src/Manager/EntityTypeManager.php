@@ -46,7 +46,7 @@ class EntityTypeManager implements EntityTypeManagerInterface
 
     public function setType(string $type): void
     {
-        $this->type        = $type;
+        $this->type = $type;
         $this->entityClass = $this->resolver->getEntity($type);
     }
 
@@ -60,20 +60,22 @@ class EntityTypeManager implements EntityTypeManagerInterface
         return $this->getEntityManager()->getRepository($this->entityClass);
     }
 
-    public function get(object $object, array $args = [], array $options = [], ResolveInfo $info = null): object
+    public function get(object $object, array $args = [], array $options = [], ?ResolveInfo $info = null): object
     {
         return $object;
     }
 
-    public function list(array $args = [], array $options = [], ResolveInfo $info = null): array
+    public function list(array $args = [], array $options = [], ?ResolveInfo $info = null): array
     {
         $criterias = $options['criterias'] ?? [];
-        $orderBy   = $options['orderBy'] ?? [];
+        $orderBy = $options['orderBy'] ?? [];
 
-        return ['items' => $this->getRepository()->findBy($criterias, $orderBy)];
+        $items = $this->getRepository()->findBy($criterias, $orderBy);
+
+        return ['items' => $items];
     }
-    
-    protected function getInstance($input, $entity = null, Configuration $configuration = null)
+
+    protected function getInstance($input, $entity = null, ?Configuration $configuration = null)
     {
         if (!$entity) {
             $entity = $this->getEntityInstance();
@@ -89,9 +91,9 @@ class EntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function update(object $object, array $args = [], array $options = [], ResolveInfo $info = null, Configuration $configuration = null): object
+    public function update(object $object, object $input, array $args = [], array $options = [], ?ResolveInfo $info = null, ?Configuration $configuration = null): object
     {
-        $entity = $this->getInstance($args['input'], $object, $configuration);
+        $entity = $this->getInstance($input, $object, $configuration);
 
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
@@ -100,7 +102,7 @@ class EntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function create(array $args = [], array $options = [], ResolveInfo $info = null, Configuration $configuration = null): object
+    public function create(array $args = [], array $options = [], ?ResolveInfo $info = null, ?Configuration $configuration = null): object
     {
         $entity = $this->getInstance($args['input'], null, $configuration);
         if (isset($options['parent'])) {
@@ -110,11 +112,11 @@ class EntityTypeManager implements EntityTypeManagerInterface
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
         $this->getEntityManager()->refresh($entity);
-        
+
         return $entity;
     }
 
-    public function delete(object $object, array $options = [], ResolveInfo $info = null): bool
+    public function delete(object $object, array $args = [], array $options = [], ?ResolveInfo $info = null): bool
     {
         try {
             $this->getEntityManager()->remove($object);

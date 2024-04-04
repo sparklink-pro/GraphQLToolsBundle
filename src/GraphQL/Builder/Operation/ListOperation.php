@@ -15,25 +15,24 @@ class ListOperation extends Operation
 
     protected function getDescription(): string
     {
-        return sprintf("List all objects of type %s", $this->type);
+        return sprintf('List all objects of type %s', $this->type);
     }
 
     protected function getType(): string
     {
-        return sprintf("[%s!]!", $this->getPayloadName());
+        return sprintf('%s!', $this->getPayloadName());
     }
 
     protected function getPayloadName(): string
     {
-        return sprintf("%sPayload", $this->getName());
+        return sprintf('%sPayload', $this->getName());
     }
 
     protected function getArgs(): array
     {
         return [
-            'limit'   => ['type' => 'Int'],
-            'offset'  => ['type' => 'Int'],
-            'orderBy' => ['type' => '[OrderListInput!]'],
+            'limit' => ['type' => 'Int'],
+            'offset' => ['type' => 'Int'],
         ];
     }
 
@@ -43,9 +42,10 @@ class ListOperation extends Operation
         $rootNode = $treeBuilder->getRootNode();
         $rootNode
             ->children()
-                ->arrayNode('criterias')->end()
-                ->arrayNode('orderBy')->end()
-            ->end();
+                ->arrayNode('criterias')->ignoreExtraKeys(false)->end()
+                ->arrayNode('orderBy')->ignoreExtraKeys(false)->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }
@@ -57,10 +57,10 @@ class ListOperation extends Operation
                 'type' => 'object',
                 'config' => [
                     'fields' => [
-                        'items' => sprintf("[%s!]!", $this->type),
-                    ]
-                ]
-            ]
+                        'items' => sprintf('[%s!]!', $this->type),
+                    ],
+                ],
+            ],
         ];
     }
 }

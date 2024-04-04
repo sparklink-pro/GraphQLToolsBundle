@@ -9,24 +9,27 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\CreateOperation;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\DeleteOperation;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\GetOperation;
+use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\IdOperation;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\ListOperation;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\OperationInterface;
 use Sparklink\GraphQLToolsBundle\GraphQL\Builder\Operation\UpdateOperation;
 
 class OperationsConfiguration implements ConfigurationInterface
 {
-    public const GET            = 'get';
-    public const LIST           = 'list';
-    public const CREATE         = 'create';
-    public const UPDATE         = 'update';
-    public const DELETE         = 'delete';
+    public const GET    = 'get';
+    public const LIST   = 'list';
+    public const CREATE = 'create';
+    public const UPDATE = 'update';
+    public const DELETE = 'delete';
+    public const ID     = 'id';
 
     public const DEFAULT_OPERATIONS = [
         self::GET    => GetOperation::class, 
         self::LIST   => ListOperation::class, 
         self::CREATE => CreateOperation::class, 
         self::UPDATE => UpdateOperation::class, 
-        self::DELETE => DeleteOperation::class
+        self::DELETE => DeleteOperation::class,
+        self::ID     => IdOperation::class
     ];
 
     protected array $defaults = [];

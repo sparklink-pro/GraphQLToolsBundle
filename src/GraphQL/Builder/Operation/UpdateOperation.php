@@ -8,18 +8,18 @@ class UpdateOperation extends CreateOperation
 {
     protected function getDescription(): string
     {
-        return sprintf("Update a %s", $this->type);
+        return sprintf('Update a %s', $this->type);
     }
 
     protected function getArgs(): array
     {
         return [
-            $this->getArgType() => $this->getScalarIdType(),
+            'item' => $this->getScalarIdType(),
         ] + parent::getArgs();
     }
 
     protected function getResolverArguments(array $arguments = [], bool $wrapped = false): string
     {
-        return parent::getResolverArguments([$this->getArgType() => $this->getScalarIdType()], true);
+        return parent::getResolverArguments(['item' => $this->getScalarIdType()], true);
     }
 }

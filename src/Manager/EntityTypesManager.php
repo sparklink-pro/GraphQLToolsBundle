@@ -7,7 +7,6 @@ namespace Sparklink\GraphQLToolsBundle\Manager;
 use Symfony\Contracts\Service\Attribute\SubscribedService;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Service\ServiceSubscriberTrait;
-use Traversable;
 
 class EntityTypesManager implements ServiceSubscriberInterface
 {
@@ -18,8 +17,8 @@ class EntityTypesManager implements ServiceSubscriberInterface
 
     public function __construct(iterable $managers, bool $useV2 = false)
     {
-        $this->managers = $managers instanceof Traversable ? iterator_to_array($managers) : $managers;
-        $this->useV2    = $useV2;
+        $this->managers = $managers instanceof \Traversable ? iterator_to_array($managers) : $managers;
+        $this->useV2 = $useV2;
     }
 
     public function getManager(string $type): EntityTypeManagerInterface

@@ -13,7 +13,7 @@ class DeleteOperation extends Operation
 
     protected function getDescription(): string
     {
-        return sprintf("Delete a %s", $this->type);
+        return sprintf('Delete a %s', $this->type);
     }
 
     public function getType(): string
@@ -23,7 +23,7 @@ class DeleteOperation extends Operation
 
     public function getArgs(): array
     {
-        return [$this->getArgType() => $this->getScalarIdType()];
+        return ['item' => $this->getScalarIdType()];
     }
 
     protected function getResolverArguments(array $arguments = [], bool $wrapped = false): string

@@ -19,86 +19,97 @@ class TypesConfiguration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('operations');
-        $rootNode    = $treeBuilder->getRootNode();
+        $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
             ->useAttributeAsKey('type')
             ->arrayPrototype()
-                ->beforeNormalization()
-                    ->always(function (array $v): array { 
-                        $operations = $v['operations'] ?? [];
-                        
-                        if (is_string($operations)) {
-                            if ('*' === $operations || 'all' === $operations) {
-                                $operations = array_map(fn($v) => [], $this->operations);
-                            } else {
-                                $operations = [$operations => []];
-                            }
-                        } else if(is_array($operations)) {
-                            $normalizedOperations = [];
-                            foreach($operations as $key => $value) {
-                                if (is_numeric($key) && is_string($value)) {
-                                    $normalizedOperations[$value] = [];
-                                } else {
-                                    $normalizedOperations[$key] = $value;
+            ->beforeNormalization()
+            ->always(function (array $v): array {
+                $operations = $v['operations'] ?? [];
+
+                if (\is_string($operations)) {
+                    $operations = [$operations];
+                }
+
+                if (\is_array($operations)) {
+                    $normalizedOperations = [];
+                    foreach ($operations as $key => $value) {
+                        /* Convert from the form: xxx: ~ */
+                        if (null === $value && \is_string($key)) {
+                            $value = $key;
+                        }
+
+                        if (\is_string($value)) {
+                            if ('all' === $value || '*' === $value) {
+                                foreach (array_keys($this->operations) as $operation) {
+                                    if (!isset($normalizedOperations[$operation])) {
+                                        $normalizedOperations[$operation] = [];
+                                    }
                                 }
+                            } else {
+                                $normalizedOperations[$value] = [];
                             }
-                            $operations = $normalizedOperations;
+                        } else {
+                            $normalizedOperations[$key] = $value;
                         }
-                        
-                        foreach($operations as $name => $config) {
-                            if (!isset($this->operations[$name])) {
-                                throw new \InvalidArgumentException(sprintf('Operation "%s" is not supported. Available operations are: "%s"', $name, implode(', ', array_keys($this->operations))));
-                            }
-                        }
+                    }
+                    $operations = $normalizedOperations;
+                }
 
-                        $v['operations'] = $operations;
-                        return $v;
-                    })
-                ->end()
-                ->children()
-                    ->scalarNode('permission')->end()
-                    ->scalarNode('access')->end()
-                    ->scalarNode('public')->end()
-                    ->arrayNode('operations')
-                        ->useAttributeAsKey('name')
-                        ->arrayPrototype()
-                            ->children()
-                                ->scalarNode('permission')->end()
-                                ->scalarNode('access')->end()
-                                ->scalarNode('public')->end()
-                                ->arrayNode('options')
-                                    ->ignoreExtraKeys(false)
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-                ->validate()
-                    ->always(function (array $v) {
-                        foreach($v['operations'] as $name => $configuration) {
-                            $typeConfiguration = $v;
-                            unset($typeConfiguration['operations']);
+                foreach ($operations as $name => $config) {
+                    if (!isset($this->operations[$name])) {
+                        throw new \InvalidArgumentException(sprintf('Operation "%s" is not supported. Available operations are: "%s"', $name, implode(', ', array_keys($this->operations))));
+                    }
+                }
 
-                            $mergedConfiguration = array_merge(
-                                $this->operations[$name],   // Default operations configuration as defined
-                                $typeConfiguration,         // Type configuration
-                                $configuration,             // Operation configuration
-                            );
+                $v['operations'] = $operations;
 
-                            if (null !== $mergedConfiguration['access'] && null !== $mergedConfiguration['permission']) {
-                                throw new \InvalidArgumentException(sprintf('Cannot use both "access" and "permission" keys on same level. Access is set to "%s" and permission to "%s". Try unsetting one of them.', $mergedConfiguration['access'], $mergedConfiguration['permission']));
-                            }
+                return $v;
+            })
+            ->end()
+            ->children()
+            ->scalarNode('permission')->end()
+            ->scalarNode('access')->end()
+            ->scalarNode('public')->end()
+            ->arrayNode('operations')
+            ->useAttributeAsKey('name')
+            ->arrayPrototype()
+            ->children()
+            ->scalarNode('permission')->end()
+            ->scalarNode('access')->end()
+            ->scalarNode('public')->end()
+            ->arrayNode('options')
+            ->ignoreExtraKeys(false)
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->end()
+            ->validate()
+            ->always(function (array $v) {
+                foreach ($v['operations'] as $name => $configuration) {
+                    $typeConfiguration = $v;
+                    unset($typeConfiguration['operations']);
 
-                            $v['operations'][$name] = $mergedConfiguration;
-                        }
+                    $mergedConfiguration = array_merge(
+                        $this->operations[$name],   // Default operations configuration as defined
+                        $typeConfiguration,         // Type configuration
+                        $configuration,             // Operation configuration
+                    );
 
-                        return $v;
-                    })
-                ->end()
+                    if (null !== $mergedConfiguration['access'] && null !== $mergedConfiguration['permission']) {
+                        throw new \InvalidArgumentException(sprintf('Cannot use both "access" and "permission" keys on same level. Access is set to "%s" and permission to "%s". Try unsetting one of them.', $mergedConfiguration['access'], $mergedConfiguration['permission']));
+                    }
+
+                    $v['operations'][$name] = $mergedConfiguration;
+                }
+
+                return $v;
+            })
+            ->end()
         ;
 
         return $treeBuilder;
     }
-
 }

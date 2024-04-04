@@ -8,4 +8,5 @@ enum OperationType: string
 {
     case QUERY = 'query';
     case MUTATION = 'mutation';
+    case NONE = 'none';
 }
