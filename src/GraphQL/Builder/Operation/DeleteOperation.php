@@ -23,7 +23,7 @@ class DeleteOperation extends Operation
 
     public function getArgs(): array
     {
-        return ['item' => $this->getScalarIdType()];
+        return ['item' => sprintf('%s!', $this->getScalarIdType())];
     }
 
     protected function getResolverArguments(array $arguments = [], bool $wrapped = false): string

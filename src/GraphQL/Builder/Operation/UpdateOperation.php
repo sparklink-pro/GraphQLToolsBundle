@@ -14,7 +14,7 @@ class UpdateOperation extends CreateOperation
     protected function getArgs(): array
     {
         return [
-            'item' => $this->getScalarIdType(),
+            'item' => sprintf('%s!', $this->getScalarIdType()),
         ] + parent::getArgs();
     }
 

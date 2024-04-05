@@ -44,7 +44,7 @@ class CreateOperation extends Operation
     {
         $args = [
             'input' => [
-                'type' => $this->getInputType()
+                'type' => sprintf('%s!', $this->getInputType())
             ]
         ];
 

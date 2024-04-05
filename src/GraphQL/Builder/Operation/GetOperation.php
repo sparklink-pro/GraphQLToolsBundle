@@ -11,6 +11,11 @@ class GetOperation extends Operation
         return OperationType::QUERY;
     }
 
+    public function getDescription(): string
+    {
+        return sprintf('Find a %s by id', $this->type);
+    }
+
     /**
      * Get the name of the operation.
      */
@@ -26,7 +31,7 @@ class GetOperation extends Operation
 
     public function getArgs(): array
     {
-        return ['id' => $this->getScalarIdType()];
+        return ['id' => sprintf('%s!', $this->getScalarIdType())];
     }
 
     protected function getResolverArguments(array $arguments = [], bool $wrapped = false): string
