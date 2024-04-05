@@ -21,7 +21,7 @@ services:
     public: true
     arguments:
       - !tagged_iterator { tag: "sparklink.type_manager", index_by: "type" }
-      - "%graphql_tools_bundle_use_v2%"
+      - "%graph_ql_tools.use_v2%"
 
   sparklink.types_manager:
     alias: Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager
