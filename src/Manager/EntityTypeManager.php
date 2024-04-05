@@ -102,9 +102,9 @@ class EntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function create(array $args = [], array $options = [], ?ResolveInfo $info = null, ?Configuration $configuration = null): object
+    public function create(object $input, array $args = [], array $options = [], ?ResolveInfo $info = null, ?Configuration $configuration = null): object
     {
-        $entity = $this->getInstance($args['input'], null, $configuration);
+        $entity = $this->getInstance($input, null, $configuration);
         if (isset($options['parent'])) {
             $args['parent']->{$options['method']}($entity);
         }
