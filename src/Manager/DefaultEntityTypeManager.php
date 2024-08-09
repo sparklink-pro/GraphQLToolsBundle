@@ -9,6 +9,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Overblog\GraphQLBundle\Error\InvalidArgumentError;
 use Overblog\GraphQLBundle\Error\InvalidArgumentsError;
 use Overblog\GraphQLBundle\Error\UserError;
+use Overblog\GraphQLBundle\Validator\Exception\ArgumentsValidationException;
 use Sparklink\GraphQLToolsBundle\Doctrine\LinkedEntityFinder;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
 use Sparklink\GraphQLToolsBundle\Utils\Configuration;
@@ -91,7 +92,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         $errors = $this->validator->validate($entity);
 
         if (\count($errors) > 0) {
-            throw new InvalidArgumentsError([new InvalidArgumentError('errors', $errors)]);
+            throw new ArgumentsValidationException($errors);
         }
 
         return $entity;
