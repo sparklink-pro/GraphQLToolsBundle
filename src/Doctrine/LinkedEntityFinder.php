@@ -6,6 +6,7 @@ namespace Sparklink\GraphQLToolsBundle\Doctrine;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\PropertyAccess\PropertyAccessorBuilder;
 
@@ -51,7 +52,11 @@ class LinkedEntityFinder
                         }
                     }
 
-                    $isMultiple = ClassMetadataInfo::MANY_TO_MANY === $mapping['type'];
+                    if (class_exists(ClassMetadataInfo::class,
+                        $isMultiple = ClassMetadataInfo::MANY_TO_MANY === $mapping['type'];
+                    } else {
+                        $isMultiple = ClassMetadata::MANY_TO_MANY === $mapping['type'];
+                    }
 
                     $qb = $manager->getRepository($className)->createQueryBuilder('o');
                     $f  = sprintf('%s.%s', 'o', $fieldName);
