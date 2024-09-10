@@ -52,7 +52,7 @@ class LinkedEntityFinder
                         }
                     }
 
-                    if (class_exists(ClassMetadataInfo::class,
+                    if (class_exists(ClassMetadataInfo::class)) {
                         $isMultiple = ClassMetadataInfo::MANY_TO_MANY === $mapping['type'];
                     } else {
                         $isMultiple = ClassMetadata::MANY_TO_MANY === $mapping['type'];
