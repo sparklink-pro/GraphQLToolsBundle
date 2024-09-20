@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Sparklink\GraphQLToolsBundle\Manager;
 
 use Symfony\Contracts\Service\Attribute\SubscribedService;
+use Symfony\Contracts\Service\ServiceMethodsSubscriberTrait;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
 class EntityTypesManager implements ServiceSubscriberInterface
 {
-    use ServiceSubscriberTrait;
+    use ServiceMethodsSubscriberTrait;
 
     protected array $managers = [];
     protected bool $useV2;

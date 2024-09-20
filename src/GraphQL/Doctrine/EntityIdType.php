@@ -32,7 +32,7 @@ final class EntityIdType extends ScalarType
         $this->metadata = $this->manager->getClassMetadata($this->className);
     }
 
-    public function serialize($entity)
+    public function serialize($entity): mixed
     {
         $id = $this->metadata->getIdentifierValues($entity);
         if (1 === \count($id)) {
@@ -42,7 +42,7 @@ final class EntityIdType extends ScalarType
         return $id;
     }
 
-    public function parseLiteral($valueNode, array $variables = null)
+    public function parseLiteral($valueNode, array $variables = null): mixed
     {
         $identifiers = $this->getIdentifiersTypesMap($this->className);
 
@@ -79,7 +79,7 @@ final class EntityIdType extends ScalarType
         return $entity;
     }
 
-    public function parseValue($id)
+    public function parseValue($id): mixed
     {
         if (!$id) {
             return null;

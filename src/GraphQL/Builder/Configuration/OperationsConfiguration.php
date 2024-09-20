@@ -39,7 +39,7 @@ class OperationsConfiguration implements ConfigurationInterface
         $this->defaults = $defaults;
     }
 
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('operations');
         $rootNode    = $treeBuilder->getRootNode();
