@@ -16,7 +16,7 @@ class TypesConfiguration implements ConfigurationInterface
         $this->operations = $operations;
     }
 
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('operations');
         $rootNode = $treeBuilder->getRootNode();

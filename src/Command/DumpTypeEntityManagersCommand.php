@@ -6,15 +6,18 @@ namespace Sparklink\GraphQLToolsBundle\Command;
 
 use Sparklink\GraphQLToolsBundle\Manager\EntityTypesManager;
 use Sparklink\GraphQLToolsBundle\Service\TypeEntityResolver;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'graphql:dump-managers',
+    description: 'Dump type entity managers',
+)]
 class DumpTypeEntityManagersCommand extends Command
 {
-    protected static $defaultName        = 'graphql:dump-managers';
-    protected static $defaultDescription = 'Dump type entity managers';
     protected TypeEntityResolver $resolver;
     private EntityTypesManager $typesManager;
 

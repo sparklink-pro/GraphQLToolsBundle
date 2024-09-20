@@ -17,7 +17,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
     public const DELETE         = 'delete';
     public const ALL_OPERATIONS = [self::GET, self::LIST, self::CREATE, self::UPDATE, self::DELETE];
 
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('builder');
         $rootNode    = $treeBuilder->getRootNode();
@@ -31,7 +31,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                     ->validate()
                         ->always(function ($v) {
                             if (null !== $v['access'] && null !== $v['permission']) {
-                                throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys on same level.');
+                                throw new \InvalidArgumentExcepDataFixturestion('Cannot use both "access" and "permission" keys on same level.');
                             }
 
                             return $v;
