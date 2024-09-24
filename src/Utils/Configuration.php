@@ -6,72 +6,68 @@ namespace Sparklink\GraphQLToolsBundle\Utils;
 
 class Configuration
 {
-    protected array $paths        = [];
-    protected array $ignoredPaths = [];
-    protected $currentPath;
+    protected array $paths = [];
+    protected ?string $currentPath = null;
+
+    public function __clone()
+    {
+        $this->currentPath = null;
+        foreach($this->paths as $path => $configurationPath) {
+            $this->paths[$path] = clone $configurationPath;
+        }
+    }
 
     public function at(string $path): self
     {
-        $this->paths[$path] = [];
         $this->currentPath  = $path;
+
+        return $this;
+    }
+
+    public function get(?string $path = null): ConfigurationPath
+    {
+        if (!$path) {
+            $path = $this->currentPath;
+        }
+        
+        if (!$path) {
+            throw new \Exception('Current path is empty');
+        }
+
+        if (!array_key_exists($path, $this->paths)) {
+            $this->paths[$path] = new ConfigurationPath();
+        }
+        
+        return $this->paths[$path] ?? null;
+    }
+
+    public function ignore(...$paths): self
+    {
+        foreach ($paths as $path) {
+            $this->get($path, true)->setIgnored(true);
+        }
 
         return $this;
     }
 
     public function setter(callable $callable): self
     {
-        $this->paths[$this->currentPath]['setter'] = $callable;
+        $this->get()->setSetter($callable);
 
         return $this;
     }
 
     public function getter(callable $callable): self
     {
-        $this->paths[$this->currentPath]['getter'] = $callable;
+        $this->get()->setGetter($callable);
 
         return $this;
-    }
-
-    public function ignore(...$paths): self
-    {
-        foreach ($paths as $path) {
-            if (!\in_array($path, $this->ignoredPaths)) {
-                $this->ignoredPaths[] = $path;
-            }
-        }
-
-        return $this;
-    }
-
-    public function isIgnored(string $path): bool
-    {
-        return \in_array($path, $this->ignoredPaths);
     }
 
     public function ignoreNull(): self
     {
-        $this->paths[$this->currentPath]['ignoreNull'] = true;
-
+        $this->get()->setIgnoreNull(true);
+        
         return $this;
-    }
-
-    public function getGetter(string $path)
-    {
-        return $this->paths[$path]['getter'] ?? false;
-    }
-
-    public function getSetter(string $path)
-    {
-        return $this->paths[$path]['setter'] ?? false;
-    }
-
-    public function getIgnoreNull(string $path)
-    {
-        return $this->paths[$path]['ignoreNull'] ?? false;
-    }
-
-    public function getIgnoredPaths()
-    {
-        return $this->ignoredPaths;
     }
 }
