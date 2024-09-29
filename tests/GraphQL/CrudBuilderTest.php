@@ -12,6 +12,10 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class CrudBuilderTest extends TestCase
 {
+    private CrudQueryBuilder $queryBuilder;
+    private CrudMutationBuilder $mutationBuilder;
+    private CrudEntityIdBuilder $entityIdBuilder;
+
     protected function setUp(): void
     {
         $this->queryBuilder     = new CrudQueryBuilder();
@@ -27,16 +31,16 @@ class CrudBuilderTest extends TestCase
                     'name' => 'Create<Type>',
                 ],
             ],
-            'operations' => [
-                'undelete' => [
-                    'name' => 'Undelete<Type>',
-                    'type' => 'mutation',
-                    'return' => '<Type>!',
-                    'args' => [
-                        'item' => ['type' => '<Type>Id!'],
-                    ],
-                ],
-            ],
+            // 'operations' => [
+            //     'undelete' => [
+            //         'name' => 'Undelete<Type>',
+            //         'type' => 'mutation',
+            //         'return' => '<Type>!',
+            //         'args' => [
+            //             'item' => ['type' => '<Type>Id!'],
+            //         ],
+            //     ],
+            // ],
             'types'=> [
                 'TEST'   => ['operations' => 'all'],
                 'TEST2'  => [
@@ -254,7 +258,7 @@ class CrudBuilderTest extends TestCase
      * Both keys "access" and "permission" are used on the same level for every configuration's level.
      * Expect the last configuration to be valid.
      */
-    public function invalidConfigProvider(): array
+    public static function invalidConfigProvider(): array
     {
         return [
             // first level

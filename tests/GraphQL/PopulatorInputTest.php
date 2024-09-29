@@ -12,6 +12,7 @@ use Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Person;
 use Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\PersonInput;
 use Sparklink\GraphQLToolsBundle\Utils\Configuration;
 use Sparklink\GraphQLToolsBundle\Utils\Populator;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\Type;
 
@@ -39,6 +40,7 @@ class PopulatorInputTest extends TestCase
 
     public function testCreate(): void
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
@@ -56,6 +58,8 @@ class PopulatorInputTest extends TestCase
 
     public function testUpdate(): void
     {
+
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
@@ -74,8 +78,176 @@ class PopulatorInputTest extends TestCase
         $this->assertEquals('31', $person->age);
     }
 
+    public function testSetSetter(): void
+    {
+        /** @var PropertyInfoExtractor $mock */
+        $mock = $this->getPropertyInfoExtractorMock();
+
+        $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
+        $accessor =  PropertyAccess::createPropertyAccessor();
+
+        $person           = new Person();
+        $person->fullName = 'John Doe';
+        $person->age      = '30';
+
+        $personInput           = new PersonInput();
+        $personInput->fullName = 'Jane Doe';
+        $personInput->age      = '31';
+
+        $config = new Configuration();
+        $config->get('fullName')->setSetter(function($target, $path, $value) use ($accessor) {
+            $accessor->setValue($target, $path, $value);
+
+            $firstName = explode(' ', $value)[0];
+            $accessor->setValue($target, 'firstName', $firstName);
+        });
+
+        $populator->populateInput($person, $personInput, $config);
+
+        $this->assertEquals('Jane Doe', $person->fullName);
+        $this->assertEquals('31', $person->age);
+        $this->assertEquals('Jane', $person->firstName);
+    }
+
+    public function testSetGetter(): void
+    {
+        $accessor =  PropertyAccess::createPropertyAccessor();
+
+        /** @var PropertyInfoExtractor $mock */
+        $mock = $this->getPropertyInfoExtractorMock();
+        $mock->expects($this->once())
+                ->method('getTypes')
+                ->willReturn([
+                    new Type(
+                        'object',
+                        false,
+                        'Doctrine\Common\Collections\Collection',
+                        true,
+                        new Type(
+                            'object',
+                            false,
+                            null,
+                            true,
+                            [],
+                        ),
+                        new Type(
+                            'object',
+                            false,
+                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
+                            true,
+                            [],
+                            [],
+                        ),
+                    ),
+                ]);
+
+        $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
+
+        $car          = new Car();
+        $car->id      = 1;
+        $car->name    = 'Ford';
+        $car->model   = 'Mustang';
+        $car->year    = '1967';
+
+        $carTwo         = new Car();
+        $carTwo->id     = 2;
+        $carTwo->name   = 'Ferrari';
+        $carTwo->model  = 'Testarossa';
+        $carTwo->year   = '1984';
+
+        $person           = new Person();
+        $person->fullName = 'John Doe';
+        $person->age      = '30';
+        $person->cars[]   = $car;
+        $person->cars[]   = $carTwo;
+
+        $carInput           = new CarInput();
+        $carInput->name     = 'Ford';
+        $carInput->model    = 'Mustang';
+        $carInput->year     = '1967';
+        $carInput->color    = 'yellow';
+
+        $carTwoInput           = new CarInput();
+        $carTwoInput->name     = 'Ferrari';
+        $carTwoInput->model    = 'Testarossa';
+        $carTwoInput->year     = '1984';
+        $carTwoInput->color    = 'red';
+
+        $personInput           = new PersonInput();
+        $personInput->fullName = 'John Doe';
+        $personInput->age      = '30';
+
+        $personInput->cars[] = $carInput;
+        $personInput->cars[] = $carTwoInput;
+
+        $config = new Configuration();
+        $config->get('cars')->setGetter(function($target, $path) use ($accessor, $person) {
+
+            $this->assertEquals('cars', $path);
+            $this->assertEquals($target, $person);
+
+            return $accessor->getValue($target, $path);
+        });
+
+        $populator->populateInput($person, $personInput, $config);
+        
+        $this->assertEquals('John Doe', $person->fullName);
+        $this->assertEquals('30', $person->age);
+    }
+
+    public function testIgnoreNulls(): void
+    {
+        /** @var PropertyInfoExtractor $mock */
+        $mock = $this->getPropertyInfoExtractorMock();
+
+        $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
+
+        $person           = new Person();
+        $person->fullName = 'John Doe';
+        $person->age      = '30';
+
+        $personInput           = new PersonInput();
+        $personInput->fullName = 'Jane Doe';
+        $personInput->age      = null;
+
+        $config = new Configuration();
+        $config->get('age')->setIgnoreNull(true);
+
+        $populator->populateInput($person, $personInput, $config);
+
+        $this->assertEquals('Jane Doe', $person->fullName);
+        $this->assertEquals('30', $person->age);
+    }
+
+    public function testIgnorePath(): void
+    {
+        /** @var PropertyInfoExtractor $mock */
+        $mock = $this->getPropertyInfoExtractorMock();
+
+        $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
+
+        $person           = new Person();
+        $person->fullName = 'John Doe';
+        $person->age      = '30';
+
+        $personInput           = new PersonInput();
+        $personInput->fullName = 'Jane Doe';
+        $personInput->age      = "5";
+
+        $config = new Configuration();
+        $config->get('age')->setIgnored(function($target, $path) {
+            return $target->age > 10;
+        });
+
+        $populator->populateInput($person, $personInput, $config);
+
+        $this->assertEquals('Jane Doe', $person->fullName);
+        $this->assertEquals('30', $person->age);
+    }
+
     public function testCreateCollection(): void
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $mock->expects($this->once())
@@ -142,6 +314,7 @@ class PopulatorInputTest extends TestCase
 
     public function testUpdateCollection()
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $mock->expects($this->any())
@@ -217,6 +390,7 @@ class PopulatorInputTest extends TestCase
 
     public function testUpdateAndCreateCollection()
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $mock->expects($this->once())
@@ -305,6 +479,7 @@ class PopulatorInputTest extends TestCase
 
     public function testUpdateCollectionIgnoreId()
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $mock->expects($this->once())
@@ -368,6 +543,7 @@ class PopulatorInputTest extends TestCase
 
     public function testCreateSimpleRelation(): void
     {
+        /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);

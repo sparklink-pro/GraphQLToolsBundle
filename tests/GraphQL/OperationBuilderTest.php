@@ -16,13 +16,12 @@ class OperationBuilderTest extends TestCase
             'configuration' => __DIR__.'/Fixtures/crud.yaml',
         ];
 
+
+
         $query = (new OperationQueryBuilder())->toMappingDefinition($configuration);
         $mutation = (new OperationMutationBuilder())->toMappingDefinition($configuration);
 
-        dump($query);
-
-        dump($mutation);
         
-
+        $this->assertArrayNotHasKey('CommentUndelete', $mutation);
     }
 }

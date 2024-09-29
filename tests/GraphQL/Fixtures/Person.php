@@ -8,6 +8,7 @@ class Person
 {
     public ?int $id;
     public ?string $fullName;
+    public ?string $firstName;
     public ?string $age;
     /** @var Car[] */
     public array $cars = [];
