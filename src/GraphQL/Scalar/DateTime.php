@@ -17,7 +17,7 @@ class DateTime
 
     public static function serialize($value)
     {
-        if (!$value instanceof \DateTime) {
+        if (!$value instanceof \DateTimeInterface) {
             throw new InvariantViolation('DateTime is not an instance of DateTimeImmutable: '.Utils::printSafe($value));
         }
 
