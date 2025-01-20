@@ -6,8 +6,6 @@ namespace Sparklink\GraphQLToolsBundle\Manager;
 
 use Doctrine\Persistence\ManagerRegistry;
 use GraphQL\Type\Definition\ResolveInfo;
-use Overblog\GraphQLBundle\Error\InvalidArgumentError;
-use Overblog\GraphQLBundle\Error\InvalidArgumentsError;
 use Overblog\GraphQLBundle\Error\UserError;
 use Overblog\GraphQLBundle\Validator\Exception\ArgumentsValidationException;
 use Sparklink\GraphQLToolsBundle\Doctrine\LinkedEntityFinder;
@@ -26,7 +24,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         protected ManagerRegistry $registry,
         protected ValidatorInterface $validator,
         protected Populator $populator,
-        protected LinkedEntityFinder $linksFinder
+        protected LinkedEntityFinder $linksFinder,
     ) {
     }
 
@@ -47,7 +45,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     public function setType(string $type): void
     {
-        $this->type        = $type;
+        $this->type = $type;
         $this->entityClass = $this->resolver->getEntity($type);
     }
 
@@ -63,11 +61,10 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
 
     /**
      * @param $criterias array       List of criterias to filter the result set by the crud query builder from configuration
-     * @param $orders    array       List of orderBy to sort the result set by the crud query builder from configuration
      * @param $args      array       List of GraphQL query arguments
      * @param $info      ResolveInfo associated with the query
      */
-    public function list(array $criterias = [], array $orderBy = [], array $args = [], ResolveInfo $info = null): array
+    public function list(array $criterias = [], array $orderBy = [], array $args = [], ?ResolveInfo $info = null): array
     {
         return ['items' => $this->getRepository()->findBy($criterias, $orderBy)];
     }
@@ -77,12 +74,12 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
      * @param $args   array       List of GraphQL query arguments
      * @param $info   ResolveInfo associated with the query
      */
-    public function item(object $entity, array $args = [], ResolveInfo $info = null)
+    public function item(object $entity, array $args = [], ?ResolveInfo $info = null)
     {
         return $entity;
     }
 
-    protected function getInstance($input, $entity = null, Configuration $configuration = null)
+    protected function getInstance($input, $entity = null, ?Configuration $configuration = null)
     {
         if (!$entity) {
             $entity = $this->getEntityInstance();
@@ -98,7 +95,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function update($input, $entity = null, Configuration $configuration = null): object
+    public function update($input, $entity = null, ?Configuration $configuration = null): object
     {
         $entity = $this->getInstance($input, $entity, $configuration);
         $this->getEntityManager()->persist($entity);
@@ -108,7 +105,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         return $entity;
     }
 
-    public function create($input, $parent = null, string $method = null, Configuration $configuration = null): object
+    public function create($input, $parent = null, ?string $method = null, ?Configuration $configuration = null): object
     {
         $entity = $this->getInstance($input, null, $configuration);
         if ($parent) {
@@ -117,7 +114,7 @@ class DefaultEntityTypeManager implements EntityTypeManagerInterface
         $this->getEntityManager()->persist($entity);
         $this->getEntityManager()->flush();
         $this->getEntityManager()->refresh($entity);
-        
+
         return $entity;
     }
 

@@ -20,7 +20,7 @@ class Populator
         $this->accessor = PropertyAccess::createPropertyAccessor();
     }
 
-    public function populateInput($target, $input, Configuration $configuration = null, array $paths = []): void
+    public function populateInput($target, $input, ?Configuration $configuration = null, array $paths = []): void
     {
         if (!$configuration) {
             $configuration = new Configuration();

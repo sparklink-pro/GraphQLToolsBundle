@@ -7,7 +7,6 @@ namespace Sparklink\GraphQLToolsBundle\GraphQL\Doctrine;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
-use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Language\AST\BooleanValueNode;
 use GraphQL\Language\AST\FloatValueNode;
@@ -24,7 +23,7 @@ final class EntityIdType extends ScalarType
     private string $className;
     private ClassMetadata $metadata;
 
-    public function __construct(ManagerRegistry $registry, string $className = null)
+    public function __construct(ManagerRegistry $registry, ?string $className = null)
     {
         parent::__construct([]);
         $this->className = $className;
@@ -36,13 +35,13 @@ final class EntityIdType extends ScalarType
     {
         $id = $this->metadata->getIdentifierValues($entity);
         if (1 === \count($id)) {
-            return $id[\array_key_first($id)];
+            return $id[array_key_first($id)];
         }
 
         return $id;
     }
 
-    public function parseLiteral($valueNode, array $variables = null): mixed
+    public function parseLiteral($valueNode, ?array $variables = null): mixed
     {
         $identifiers = $this->getIdentifiersTypesMap($this->className);
 
@@ -56,24 +55,24 @@ final class EntityIdType extends ScalarType
                 $nodes[$name] = $node->value;
             }
         } else {
-            $nodes = [\array_key_first($identifiers) => $valueNode];
+            $nodes = [array_key_first($identifiers) => $valueNode];
         }
 
         $id = [];
         foreach ($identifiers as $name => $doctrineType) {
             if (!$nodes[$name]) {
                 throw new Error(\sprintf('The identifier field "%s" is missing from the identifiers', $name));
-            } elseif (!$this->isAcceptableNodeForType($doctrineType, $nodes[$name])) {
-                $acceptables = $this->getNodeClassesForType($doctrineType);
-                throw new Error(\sprintf('The identifier field "%s" is expecting a value of type %s', \implode(' or ', \array_map($this->getValueNodeName, $acceptables))));
-            } else {
-                $id[$name] = $nodes[$name]->value;
             }
+            if (!$this->isAcceptableNodeForType($doctrineType, $nodes[$name])) {
+                $acceptables = $this->getNodeClassesForType($doctrineType);
+                throw new Error(\sprintf('The identifier field "%s" is expecting a value of type %s', implode(' or ', array_map($this->getValueNodeName, $acceptables))));
+            }
+            $id[$name] = $nodes[$name]->value;
         }
 
         $entity = $this->manager->getRepository($this->className)->find($id);
         if (!$entity) {
-            throw new Error(\sprintf('Requested entity not found'));
+            throw new Error('Requested entity not found');
         }
 
         return $entity;
@@ -108,7 +107,7 @@ final class EntityIdType extends ScalarType
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     protected function isAcceptableNodeForType(string $doctrineType, ValueNode $node): bool
     {
@@ -124,7 +123,7 @@ final class EntityIdType extends ScalarType
     /**
      * @return string[]
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function getNodeClassesForType(string $doctrineType): array
     {

@@ -13,7 +13,7 @@ class UploadType extends ScalarType
     /**
      * @param string $name
      */
-    public function __construct(string $name = null)
+    public function __construct(?string $name = null)
     {
         parent::__construct([
             'name'        => $name,
@@ -38,7 +38,7 @@ class UploadType extends ScalarType
         throw new InvariantViolation(sprintf('%s scalar serialization unsupported.', $this->name));
     }
 
-    public function parseLiteral($valueNode, array $variables = null): void
+    public function parseLiteral($valueNode, ?array $variables = null): void
     {
         throw new InvariantViolation(sprintf('%s scalar literal unsupported.', $this->name));
     }
