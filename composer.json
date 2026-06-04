@@ -11,15 +11,15 @@
     "homepage": "https://github.com/sparklink-pro/GraphQLToolsBundle",
     "license": "MIT",
     "require": {
-        "php": ">=8",
-        "symfony/dependency-injection": "^4.4|^5.0|^6.0|^7.0|^8.0",
-        "symfony/deprecation-contracts": "^2.0",
-        "symfony/event-dispatcher": "^4.4|^5.0|^6.0|^7.0|^8.0",
-        "symfony/framework-bundle": "^4.4|^5.0|^6.0|^7.0|^8.0",
-        "symfony/http-foundation": "^4.4|^5.0|^6.0|^7.0|^8.0",
-        "symfony/http-kernel": "^4.4|^5.0|^6.0|^7.0|^8.0",
-        "symfony/polyfill-php73": "^1.13",
-        "symfony/property-access": "^4.4|^5.0|^6.0|^7.0|^8.0"
+        "php": ">=8.2",
+        "symfony/dependency-injection": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/deprecation-contracts": "^2.5|^3.0",
+        "symfony/event-dispatcher": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/framework-bundle": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/http-foundation": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/http-kernel": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/property-access": "^5.4|^6.4|^7.0|^8.0",
+        "symfony/property-info": "^6.4|^7.0|^8.0"
     },
     "conflict": {
         "doctrine/dbal": "<2.10"
@@ -39,9 +39,10 @@
         }
     },
     "require-dev": {
-        "overblog/graphql-bundle": "^0.14.1",
+        "overblog/graphql-bundle": "^1.10",
         "phpunit/phpunit": "^9.5",
-        "symfony/phpunit-bridge": "^6.0",
-        "symfony/test-pack": "^1.0"
+        "symfony/phpunit-bridge": "^6.4|^7.0|^8.0",
+        "symfony/test-pack": "^1.0",
+        "symfony/yaml": "^8.0"
     }
 }

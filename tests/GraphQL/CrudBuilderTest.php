@@ -198,6 +198,7 @@ class CrudBuilderTest extends TestCase
     /**
      * @dataProvider invalidConfigProvider
      */
+    #[\PHPUnit\Framework\Attributes\DataProvider('invalidConfigProvider')]
     public function testInvalidConfigurationException($configuration, $path, $exception = true): void
     {
         if ($exception) {

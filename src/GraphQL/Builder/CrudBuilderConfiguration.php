@@ -31,7 +31,7 @@ class CrudBuilderConfiguration implements ConfigurationInterface
                     ->validate()
                         ->always(function ($v) {
                             if (null !== $v['access'] && null !== $v['permission']) {
-                                throw new \InvalidArgumentExcepDataFixturestion('Cannot use both "access" and "permission" keys on same level.');
+                                throw new \InvalidArgumentException('Cannot use both "access" and "permission" keys on same level.');
                             }
 
                             return $v;

@@ -10,6 +10,9 @@ use Sparklink\GraphQLToolsBundle\Utils\Populator\IgnoredValue;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
+use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\Type\CollectionType;
+use Symfony\Component\TypeInfo\Type\GenericType;
 
 class Populator
 {
@@ -26,12 +29,12 @@ class Populator
             $configuration = new Configuration();
         }
 
-        $inputProperties = is_array($input) ? $input : get_object_vars($input);
-        
+        $inputProperties = \is_array($input) ? $input : get_object_vars($input);
+
         // Loop through all input/array properties
         foreach ($inputProperties as $inputProperty => $value) {
             $currentPath = [...$paths, $inputProperty];
-            $path        = implode('.', $currentPath);
+            $path = implode('.', $currentPath);
             $pathConfiguration = $configuration->get($path);
 
             // These property should be ignored
@@ -95,31 +98,73 @@ class Populator
         return $this->accessor->setValue($entity, $property, $value);
     }
 
-    // Set a value of type input object or an array of input objects
+    /**
+     * Set a value of type input object or an array of input objects.
+     */
     protected function processInputValue($target, string $property, $inputValue, Configuration $configuration, array $paths = []): void
     {
-        $propertyInfo = $this->propertyInfoExtractor->getTypes($target::class, $property)[0] ?? null;
+        $isCollection = false;
+        $class = null;
+
+        if (class_exists(Type::class) && method_exists($this->propertyInfoExtractor, 'getType')) {
+            $propertyInfo = $this->propertyInfoExtractor->getType($target::class, $property);
+            if (!$propertyInfo) {
+                throw new \Exception("Unable to determine property {$property} info on target class ".$target::class);
+            }
+            /** @var CollectionType|null $collectionType */
+            $collectionType = $this->findType(
+                $propertyInfo,
+                static fn (Type $t): bool => $t instanceof CollectionType && $t->getWrappedType() instanceof GenericType,
+            );
+
+            if (null !== $collectionType) {
+                $isCollection = true;
+                $valueType = $collectionType->getCollectionValueType();
+
+                /** @var Type\ObjectType|null $objectType */
+                $objectType = $this->findType(
+                    $valueType,
+                    static fn (Type $t): bool => $t instanceof Type\ObjectType,
+                );
+                $class = $objectType?->getClassName();
+            } else {
+                /** @var Type\ObjectType|null $objectType */
+                $objectType = $this->findType(
+                    $propertyInfo,
+                    static fn (Type $t): bool => $t instanceof Type\ObjectType,
+                );
+                $class = $objectType?->getClassName();
+            }
+        } else {
+            $types = $this->propertyInfoExtractor->getTypes($target::class, $property);
+            if (!$types || !isset($types[0])) {
+                throw new \Exception("Unable to determine property {$property} info on target class ".$target::class);
+            }
+
+            $propertyInfo = $types[0];
+            $isCollection = $propertyInfo->isCollection();
+            if ($isCollection) {
+                $collectionValues = $propertyInfo->getCollectionValueTypes();
+                $class = isset($collectionValues[0]) ? $collectionValues[0]->getClassName() : null;
+            } else {
+                $class = $propertyInfo->getClassName();
+            }
+        }
+
         $path = implode('.', $paths);
         $pathConfiguration = $configuration->get($path);
         $currentValue = $this->getValue($target, $property, $pathConfiguration);
 
-        if (!$propertyInfo) {
-            throw new \Exception("Unable to determine property {$property} info on target class ".$target::class);
-        }
-        $isCollection = $propertyInfo->isCollection();
-        $class        = $propertyInfo->getClassName();
-
         // The target property is a collection
         if ($isCollection) {
-            $class = $propertyInfo->getCollectionValueTypes()[0]?->getClassName();
             if (!$class) {
                 throw new \Exception("Unable to determine expected property class for property {$property} on  ".$target::class);
             }
-            
+
             if (!\is_array($inputValue)) {
                 throw new \Exception("Expected array input to populate collection property {$property} on  ".$target::class);
             }
-            $pathId     = implode('.', [...$paths, 'id']);
+            $pathId = implode('.', [...$paths, 'id']);
             $pathIdConfiguration = $configuration->get($pathId);
 
             // If id is ignored, we enforce the creation of a new target
@@ -128,7 +173,7 @@ class Populator
             // Create a new collection
             $collection = [];
             foreach ($inputValue as $index => $inputValueEntry) {
-                $inputEntryId    = $this->accessor->getValue($inputValueEntry, 'id');
+                $inputEntryId = $this->accessor->getValue($inputValueEntry, 'id');
                 $entryValue = null;
 
                 // Id is not ignored and we have an id in the input
@@ -171,5 +216,28 @@ class Populator
             }
             $this->populateInput($currentValue, $inputValue, $configuration, $paths);
         }
+    }
+
+    /**
+     * @param Type                 $type      The root type to search
+     * @param callable(Type): bool $predicate The condition the type node must satisfy
+     *
+     * @return Type|null The first matching type node, or null if not found
+     */
+    private function findType(Type $type, callable $predicate): ?Type
+    {
+        $found = null;
+
+        $type->isSatisfiedBy(static function (Type $t) use ($predicate, &$found): bool {
+            if (null === $found && $predicate($t)) {
+                $found = $t;
+
+                return true; // Stop further traversal in this branch
+            }
+
+            return false;
+        });
+
+        return $found;
     }
 }

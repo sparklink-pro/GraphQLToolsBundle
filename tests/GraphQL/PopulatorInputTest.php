@@ -14,7 +14,7 @@ use Sparklink\GraphQLToolsBundle\Utils\Configuration;
 use Sparklink\GraphQLToolsBundle\Utils\Populator;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
-use Symfony\Component\PropertyInfo\Type;
+use Symfony\Component\TypeInfo\Type;
 
 class PopulatorInputTest extends TestCase
 {
@@ -115,31 +115,18 @@ class PopulatorInputTest extends TestCase
 
         /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
+        $method = class_exists(\Symfony\Component\TypeInfo\Type::class) ? 'getType' : 'getTypes';
+        $type = $this->createMockType(
+            'object',
+            false,
+            'Doctrine\Common\Collections\Collection',
+            true,
+            $this->createMockType('object', false, null, true, []),
+            $this->createMockType('object', false, "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car", true, [], [])
+        );
         $mock->expects($this->once())
-                ->method('getTypes')
-                ->willReturn([
-                    new Type(
-                        'object',
-                        false,
-                        'Doctrine\Common\Collections\Collection',
-                        true,
-                        new Type(
-                            'object',
-                            false,
-                            null,
-                            true,
-                            [],
-                        ),
-                        new Type(
-                            'object',
-                            false,
-                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
-                            true,
-                            [],
-                            [],
-                        ),
-                    ),
-                ]);
+                ->method($method)
+                ->willReturn(class_exists(\Symfony\Component\TypeInfo\Type::class) ? $type : [$type]);
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
 
@@ -249,32 +236,19 @@ class PopulatorInputTest extends TestCase
     {
         /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
+        $method = class_exists(\Symfony\Component\TypeInfo\Type::class) ? 'getType' : 'getTypes';
+        $type = $this->createMockType(
+            'object',
+            false,
+            'Doctrine\Common\Collections\Collection',
+            true,
+            $this->createMockType('object', false, null, true, []),
+            $this->createMockType('object', false, "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car", true, [], [])
+        );
 
         $mock->expects($this->once())
-                ->method('getTypes')
-                ->willReturn([
-                    new Type(
-                        'object',
-                        false,
-                        'Doctrine\Common\Collections\Collection',
-                        true,
-                        new Type(
-                            'object',
-                            false,
-                            null,
-                            true,
-                            [],
-                        ),
-                        new Type(
-                            'object',
-                            false,
-                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
-                            true,
-                            [],
-                            [],
-                        ),
-                    ),
-                ]);
+                ->method($method)
+                ->willReturn(class_exists(\Symfony\Component\TypeInfo\Type::class) ? $type : [$type]);
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
 
@@ -316,32 +290,19 @@ class PopulatorInputTest extends TestCase
     {
         /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
+        $method = class_exists(\Symfony\Component\TypeInfo\Type::class) ? 'getType' : 'getTypes';
+        $type = $this->createMockType(
+            'object',
+            false,
+            'Doctrine\Common\Collections\Collection',
+            true,
+            $this->createMockType('object', false, null, true, []),
+            $this->createMockType('object', false, "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car", true, [], [])
+        );
 
         $mock->expects($this->any())
-                ->method('getTypes')
-                ->willReturn([
-                    new Type(
-                        'object',
-                        false,
-                        'Doctrine\Common\Collections\Collection',
-                        true,
-                        new Type(
-                            'object',
-                            false,
-                            null,
-                            true,
-                            [],
-                        ),
-                        new Type(
-                            'object',
-                            false,
-                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
-                            true,
-                            [],
-                            [],
-                        ),
-                    ),
-                ]);
+                ->method($method)
+                ->willReturn(class_exists(\Symfony\Component\TypeInfo\Type::class) ? $type : [$type]);
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
 
@@ -392,32 +353,19 @@ class PopulatorInputTest extends TestCase
     {
         /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
+        $method = class_exists(\Symfony\Component\TypeInfo\Type::class) ? 'getType' : 'getTypes';
+        $type = $this->createMockType(
+            'object',
+            false,
+            'Doctrine\Common\Collections\Collection',
+            true,
+            $this->createMockType('object', false, null, true, []),
+            $this->createMockType('object', false, "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car", true, [], [])
+        );
 
         $mock->expects($this->once())
-                ->method('getTypes')
-                ->willReturn([
-                    new Type(
-                        'object',
-                        false,
-                        'Doctrine\Common\Collections\Collection',
-                        true,
-                        new Type(
-                            'object',
-                            false,
-                            null,
-                            true,
-                            [],
-                        ),
-                        new Type(
-                            'object',
-                            false,
-                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
-                            true,
-                            [],
-                            [],
-                        ),
-                    ),
-                ]);
+                ->method($method)
+                ->willReturn(class_exists(\Symfony\Component\TypeInfo\Type::class) ? $type : [$type]);
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
 
@@ -481,32 +429,19 @@ class PopulatorInputTest extends TestCase
     {
         /** @var PropertyInfoExtractor $mock */
         $mock = $this->getPropertyInfoExtractorMock();
+        $method = class_exists(\Symfony\Component\TypeInfo\Type::class) ? 'getType' : 'getTypes';
+        $type = $this->createMockType(
+            'object',
+            false,
+            'Doctrine\Common\Collections\Collection',
+            true,
+            $this->createMockType('object', false, null, true, []),
+            $this->createMockType('object', false, "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car", true, [], [])
+        );
 
         $mock->expects($this->once())
-                ->method('getTypes')
-                ->willReturn([
-                    new Type(
-                        'object',
-                        false,
-                        'Doctrine\Common\Collections\Collection',
-                        true,
-                        new Type(
-                            'object',
-                            false,
-                            null,
-                            true,
-                            [],
-                        ),
-                        new Type(
-                            'object',
-                            false,
-                            "Sparklink\GraphQLToolsBundle\Tests\GraphQL\Fixtures\Car",
-                            true,
-                            [],
-                            [],
-                        ),
-                    ),
-                ]);
+                ->method($method)
+                ->willReturn(class_exists(\Symfony\Component\TypeInfo\Type::class) ? $type : [$type]);
 
         $populator = new Populator(new TypeEntityResolver(self::MAPPING), $mock);
 
@@ -568,9 +503,85 @@ class PopulatorInputTest extends TestCase
 
     private function getPropertyInfoExtractorMock()
     {
+        $methods = class_exists(\Symfony\Component\TypeInfo\Type::class) ? ['getType'] : ['getTypes'];
+
         return $this->getMockBuilder(PropertyInfoExtractor::class)
         ->disableOriginalConstructor()
-        ->onlyMethods(['getTypes'])
+        ->onlyMethods($methods)
         ->getMock();
+    }
+
+    private function createMockType(
+        string $builtinType,
+        bool $nullable = false,
+        ?string $class = null,
+        bool $collection = false,
+        $collectionKeyType = null,
+        $collectionValueType = null
+    ) {
+        if (class_exists(\Symfony\Component\TypeInfo\Type::class)) {
+            if ($collection) {
+                $mainType = $class !== null ? \Symfony\Component\TypeInfo\Type::object($class) : \Symfony\Component\TypeInfo\Type::builtin('array');
+                
+                // Extract class name from collection value type
+                $valType = null;
+                if (\is_array($collectionValueType)) {
+                    $valType = isset($collectionValueType[0]) ? $this->getMockTypeClassName($collectionValueType[0]) : null;
+                } elseif ($collectionValueType !== null) {
+                    $valType = $this->getMockTypeClassName($collectionValueType);
+                }
+                
+                $valueType = $valType ? \Symfony\Component\TypeInfo\Type::object($valType) : null;
+                
+                // Extract class name from collection key type
+                $kType = null;
+                if (\is_array($collectionKeyType)) {
+                    $kType = isset($collectionKeyType[0]) ? $this->getMockTypeClassName($collectionKeyType[0]) : null;
+                } elseif ($collectionKeyType !== null) {
+                    $kType = $this->getMockTypeClassName($collectionKeyType);
+                }
+                
+                $keyType = $kType ? \Symfony\Component\TypeInfo\Type::object($kType) : null;
+                
+                $type = \Symfony\Component\TypeInfo\Type::collection($mainType, $valueType, $keyType);
+            } else {
+                if ($builtinType === 'object') {
+                    $type = \Symfony\Component\TypeInfo\Type::object($class);
+                } else {
+                    $type = \Symfony\Component\TypeInfo\Type::builtin($builtinType);
+                }
+            }
+
+            if ($nullable) {
+                $type = Type::nullable($type);
+            }
+
+            return $type;
+        }
+
+        $className = 'Symfony\Component\PropertyInfo\Type';
+        return new $className(
+            $builtinType,
+            $nullable,
+            $class,
+            $collection,
+            $collectionKeyType,
+            $collectionValueType
+        );
+    }
+
+    private function getMockTypeClassName($type): ?string
+    {
+        if ($type instanceof \Symfony\Component\TypeInfo\Type) {
+            if ($type instanceof \Symfony\Component\TypeInfo\Type\ObjectType) {
+                return $type->getClassName();
+            }
+            if ($type instanceof \Symfony\Component\TypeInfo\Type\WrappingTypeInterface) {
+                return $this->getMockTypeClassName($type->getWrappedType());
+            }
+            return null;
+        }
+
+        return $type->getClassName();
     }
 }
